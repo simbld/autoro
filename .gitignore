@@ -1,0 +1,12 @@
+# Rust
+target/
+backend/target/
+
+# Secrets
+.env
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
