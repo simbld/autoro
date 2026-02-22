@@ -12,7 +12,7 @@ impl std::fmt::Debug for Config {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Config")
         .field("etoro_base_url", &self.etoro_base_url)
-        .field("etoro_api_key", &self.etoro_api_key)
+        .field("etoro_api_key", &"[REDACTED]")
         .field("bind_addr", &self.bind_addr)
         .field("cors_origin", &self.cors_origin)
             .finish()
