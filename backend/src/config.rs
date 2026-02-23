@@ -20,21 +20,30 @@ impl std::fmt::Debug for Config {
     }
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ConfigError {
+    #[error("Missing environment variable: {0}")]
+    MissingVar(&'static str),
+    #[error("Invalid environment variable {0}: {1}")]
+    InvalidVar(&'static str, String),
+}
+
 impl Config {
-    pub fn from_env() -> Self {
-        let etoro_base_url = std::env::var("ETORO_BASE_URL").unwrap_or_else(|_| {
-            panic!("Missing ETORO_BASE_URL (set it in backend/.env)")
-        });
-        let etoro_api_key = std::env::var("ETORO_API_KEY").unwrap_or_else(|_| panic!("Missing ETORO_API_KEY (set it in backend/.env)"));
+    pub fn from_env() -> Result<Config, ConfigError> {
+        let etoro_base_url = std::env::var("ETORO_BASE_URL")
+            .map_err(|_| ConfigError::MissingVar("ETORO_BASE_URL"))?;
+
+        let etoro_api_key = std::env::var("ETORO_API_KEY")
+            .map_err(|e| ConfigError::InvalidVar("ETORO_API_KEY", e.to_string()))?;
         let bind_addr = std::env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:8000".into());
         let cors_origin = std::env::var("CORS_ORIGIN").ok();
 
-        Self {
+        Ok(Self {
             etoro_base_url,
             etoro_api_key,
             bind_addr,
             cors_origin,
-        }
+        })
 
     }
 }
