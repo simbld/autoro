@@ -11,15 +11,15 @@ use axum::{
 use serde_json::json;
 
 use crate::etoro::EtoroClient;
-use crate::models::{CreateOrderRequest, Health};
+use crate::models::{CreateOrderRequest, CreateOrderResponse, Health};
 
 #[derive(Clone)]
 pub struct AppState {
-    pub etoro: EtoroClient,
+    pub etoro_client: EtoroClient,
 }
 
-pub fn app_router(etoro: EtoroClient) -> Router {
-    let state = AppState { etoro };
+pub fn app_router(etoro_client: EtoroClient) -> Router {
+    let state = AppState { etoro_client };
 
     Router::new()
         .route("/health", get(health))
@@ -28,5 +28,19 @@ pub fn app_router(etoro: EtoroClient) -> Router {
 }
 
 async fn health() -> Json<Health> {
-    Json(Health { ok: true })
+    Json(Health {
+        ok: true,
+    })
+}
+
+async fn create_order(
+    State(state): State<AppState>,
+    Json(payload): Json<CreateOrderRequest>,
+) -> Result<Json<CreateOrderResponse>, StatusCode> {
+    let order = state.etoro_client.send_order(payload).await;
+
+  match order {
+	Ok(response) => Ok(Json(response)),
+	Err(_) => Err(StatusCode::BAD_REQUEST),
+  }
 }
