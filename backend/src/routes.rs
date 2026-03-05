@@ -2,13 +2,11 @@
 // Example: `curl -X POST http://127.0.0.1:8080/api/orders -d ...`
 
 use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    routing::{get, post},
-    Json, Router,
+  extract::State,
+  http::StatusCode  ,
+  routing::{get, post},
+  Json, Router,
 };
-use serde_json::json;
 
 use crate::etoro::EtoroClient;
 use crate::models::{CreateOrderRequest, CreateOrderResponse, Health};
