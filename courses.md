@@ -81,3 +81,14 @@ Self Alias pour le type courant dans un impl
 Tu lis tes recettes (config) Tu allumes les lumières (logs) Tu prépares ta cuisine (client eToro) Tu poses les règles d'accès (CORS) Tu dresses le menu (routes) Tu ouvres la porte (serveur)
 
 Sans config, rien ne fonctionne. Sans serveur, personne n'entre.
+
+1. Le serveur démarre ! — tu vois le log listening on https://127.0.0.1:8080 ✅
+2. Le port 8080 est déjà utilisé — un autre processus l'occupe.
+   Tue le processus qui utilise le port :
+   bashkill $(lsof -t -i:8080)
+3. ou
+4. fuser -k 8080/tcp
+5. ou
+6. ss -tlnp | grep 8080
+5. 
+   Puis relance cargo run.

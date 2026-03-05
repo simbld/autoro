@@ -23,22 +23,17 @@ async fn main() {
         .init();
 
     let cfg = Config::from_env().expect("Failed to load config");
-    let etoro = EtoroClient::new(cfg.etoro_base_url.clone(), cfg.etoro_api_key.clone());
+    let etoro = EtoroClient::new(cfg.etoro_base_url.as_str(), cfg.etoro_api_key.clone());
 
-    let cors = CorsLayer::new()
-        .allow_origin(
-            cfg.cors_origin
-                .as_deref()
-                .map(|_| Any) // keep simple for dev; tighten in prod
-                .unwrap_or(Any),
-        )
-        .allow_headers(Any)
-        .allow_methods(Any);
+	let cors: CorsLayer = CorsLayer::new()
+	  .allow_origin(Any)
+	  .allow_headers(Any)
+	  .allow_methods(Any);
 
     let app: Router = app_router(etoro).layer(cors);
 
     let addr: SocketAddr = cfg.bind_addr.parse().expect("Invalid BIND_ADDR");
-    tracing::info!("listening on http://{}", addr);
+    tracing::info!("listening on https://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
