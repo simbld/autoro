@@ -5,6 +5,8 @@ mod config;
 mod etoro;
 mod models;
 mod routes;
+mod strategy;
+mod trader;
 
 use axum::Router;
 use config::Config;
@@ -24,6 +26,13 @@ async fn main() {
 
     let cfg = Config::from_env().expect("Failed to load config");
     let etoro = EtoroClient::new(cfg.etoro_base_url.as_str(), cfg.etoro_api_key.clone(), cfg.etoro_user_key.clone());
+
+    // Lancer le trader en arrière-plan
+    let trader_client = etoro.clone();
+    let trader_cfg = cfg.clone();
+    tokio::spawn(async move {
+        trader::Trader::start(trader_client, &trader_cfg).await;
+    });
 
 	let cors: CorsLayer = CorsLayer::new()
 	  .allow_origin(Any)
