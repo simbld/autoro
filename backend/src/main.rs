@@ -23,7 +23,7 @@ async fn main() {
         .init();
 
     let cfg = Config::from_env().expect("Failed to load config");
-    let etoro = EtoroClient::new(cfg.etoro_base_url.as_str(), cfg.etoro_api_key.clone());
+    let etoro = EtoroClient::new(cfg.etoro_base_url.as_str(), cfg.etoro_api_key.clone(), cfg.etoro_user_key.clone());
 
 	let cors: CorsLayer = CorsLayer::new()
 	  .allow_origin(Any)
