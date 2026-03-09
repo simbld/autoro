@@ -19,6 +19,8 @@ pub struct Config {
     pub trader_interval_secs: u64,
     /// Taille de la fenêtre de prix pour le calcul SMA
     pub trader_window_size: usize,
+    /// Nombre de confirmations consécutives requises avant d'agir
+    pub trader_confirm_ticks: i8,
 }
 
 impl std::fmt::Debug for Config {
@@ -69,9 +71,13 @@ impl Config {
             .parse::<u64>()
             .unwrap_or(30);
         let trader_window_size = std::env::var("TRADER_WINDOW_SIZE")
-            .unwrap_or_else(|_| "20".into())
+            .unwrap_or_else(|_| "50".into())
             .parse::<usize>()
-            .unwrap_or(20);
+            .unwrap_or(50);
+        let trader_confirm_ticks = std::env::var("TRADER_CONFIRM_TICKS")
+            .unwrap_or_else(|_| "3".into())
+            .parse::<i8>()
+            .unwrap_or(3);
 
         Ok(Self {
             etoro_base_url,
@@ -85,6 +91,7 @@ impl Config {
             trader_leverage,
             trader_interval_secs,
             trader_window_size,
+            trader_confirm_ticks,
         })
     }
 }
