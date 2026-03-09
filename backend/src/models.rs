@@ -38,16 +38,11 @@ pub struct CreateOrderRequest {
     pub is_trailing_stop_loss: Option<bool>,
 }
 
-/// Réponse après ouverture d'un ordre (champs retournés par l'API eToro)
+/// Réponse brute de l'API eToro pour les ordres (format variable selon l'endpoint).
+/// On utilise serde_json::Value pour accepter n'importe quelle structure.
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-pub struct CreateOrderResponse {
-    pub order_id: i64,
-    pub status: String,
-    pub position_id: Option<i64>,
-    pub error_code: Option<i64>,
-    pub error_message: Option<String>,
-}
+#[serde(transparent)]
+pub struct CreateOrderResponse(pub serde_json::Value);
 
 /// Requête pour fermer une position (totale ou partielle)
 /// Endpoint : POST /trading/execution/market-close-orders/positions/{positionId}
@@ -60,22 +55,19 @@ pub struct ClosePositionRequest {
 
 /// Position ouverte dans le portfolio
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-#[allow(clippy::struct_field_names)]
+#[serde(rename_all = "camelCase")]
 pub struct Position {
+    #[serde(rename = "positionID")]
     pub position_id: i64,
+    #[serde(rename = "instrumentID")]
     pub instrument_id: i64,
     pub is_buy: bool,
     pub leverage: i64,
     pub units: f64,
     pub amount: f64,
     pub open_rate: f64,
-    pub open_timestamp: chrono::DateTime<chrono::Utc>,
     pub stop_loss_rate: Option<f64>,
     pub take_profit_rate: Option<f64>,
-    pub is_trailing_stop_loss: Option<bool>,
-    pub net_profit: f64,
-    pub investment: f64,
 }
 
 /// Portfolio complet du client (réponse PnL)
@@ -83,14 +75,21 @@ pub struct Position {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClientPortfolio {
-    /// Solde total du compte
-    pub credits: f64,
+    /// Solde disponible du compte
+    pub credit: f64,
     /// Positions ouvertes
     pub positions: Vec<Position>,
-    /// Ordres de marché en attente (Market Orders)
+    /// Ordres de marché en attente
     pub orders_for_open: Vec<PendingOrder>,
-    /// Ordres MIT en attente (Market-if-touched / Limit)
+    /// Ordres limit/stop en attente
     pub orders: Vec<PendingOrder>,
+}
+
+/// Wrapper de la réponse /pnl
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PortfolioResponse {
+    pub client_portfolio: ClientPortfolio,
 }
 
 /// Ordre en attente (utilisé dans le calcul du cash disponible)
@@ -123,8 +122,9 @@ pub struct InstrumentSearchResponse {
 /// Prix en temps réel d'un instrument (bid/ask)
 /// Endpoint : GET /market-data/instruments/rates?instrumentIds=100000
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all = "camelCase")]
 pub struct InstrumentRate {
+    #[serde(rename = "instrumentID")]
     pub instrument_id: i64,
     /// Prix d'achat (ask)
     pub ask: f64,
@@ -137,7 +137,6 @@ pub struct InstrumentRate {
 
 /// Réponse de l'endpoint des taux de marché
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
 pub struct InstrumentRatesResponse {
     pub rates: Vec<InstrumentRate>,
 }
