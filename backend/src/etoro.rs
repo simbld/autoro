@@ -4,7 +4,7 @@ use reqwest::Client;
 use uuid::Uuid;
 use crate::models::{
     ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse,
-    InstrumentRatesResponse, InstrumentSearchResponse, TradeHistoryItem,
+    InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse, TradeHistoryItem,
 };
 
 #[derive(Clone)]
@@ -13,6 +13,8 @@ pub struct EtoroClient {
     pub api_key: String,
     pub user_key: String,
     pub http: Client,
+    /// "demo" ou "real"
+    pub mode: String,
 }
 
 impl std::fmt::Debug for EtoroClient {
@@ -22,17 +24,19 @@ impl std::fmt::Debug for EtoroClient {
             .field("api_key", &"[REDACTED]")
             .field("user_key", &"[REDACTED]")
             .field("http", &self.http)
+            .field("mode", &self.mode)
             .finish()
     }
 }
 
 impl EtoroClient {
-    pub fn new(base_url: &str, api_key: String, user_key: String) -> Self {
+    pub fn new(base_url: &str, api_key: String, user_key: String, mode: String) -> Self {
         Self {
             base_url: base_url.trim_end_matches('/').to_string(),
             api_key,
             user_key,
             http: Client::new(),
+            mode,
         }
     }
 
@@ -58,24 +62,31 @@ impl EtoroClient {
         self.get("/api/v1/market-data/search")
             .query(&[("internalSymbolFull", symbol)])
             .send().await?
+            .error_for_status()?
             .json::<InstrumentSearchResponse>()
             .await
     }
 
     pub async fn get_rates(&self, instrument_ids: &[i64]) -> Result<InstrumentRatesResponse, reqwest::Error> {
-        let ids_param = instrument_ids.iter().map(ToString::to_string).collect::<Vec<_>>().join(",");
+        let params: Vec<(&str, String)> = instrument_ids
+            .iter()
+            .map(|id| ("instrumentIds", id.to_string()))
+            .collect();
         self.get("/api/v1/market-data/instruments/rates")
-            .query(&[("instrumentIds", ids_param)])
+            .query(&params)
             .send().await?
+            .error_for_status()?
             .json::<InstrumentRatesResponse>()
             .await
     }
 
     pub async fn get_portfolio(&self) -> Result<ClientPortfolio, reqwest::Error> {
-        self.get("/api/v1/trading/info/demo/pnl")
+        let resp = self.get(&format!("/api/v1/trading/info/{}/pnl", self.mode))
             .send().await?
-            .json::<ClientPortfolio>()
-            .await
+            .error_for_status()?
+            .json::<PortfolioResponse>()
+            .await?;
+        Ok(resp.client_portfolio)
     }
 
     pub async fn close_position(
@@ -83,9 +94,10 @@ impl EtoroClient {
         position_id: i64,
         payload: ClosePositionRequest,
     ) -> Result<CreateOrderResponse, reqwest::Error> {
-        self.post(&format!("/api/v1/trading/execution/market-close-orders/positions/{position_id}"))
+        self.post(&format!("/api/v1/trading/execution/{}/market-close-orders/positions/{position_id}", self.mode))
             .json(&payload)
             .send().await?
+            .error_for_status()?
             .json::<CreateOrderResponse>()
             .await
     }
@@ -94,6 +106,7 @@ impl EtoroClient {
         self.get("/api/v1/trading/info/trade/history")
             .query(&[("minDate", min_date)])
             .send().await?
+            .error_for_status()?
             .json::<Vec<TradeHistoryItem>>()
             .await
     }
@@ -104,9 +117,10 @@ impl EtoroClient {
         } else {
             "market-open-orders/by-units"
         };
-        self.post(&format!("/api/v1/trading/execution/{endpoint}"))
+        self.post(&format!("/api/v1/trading/execution/{}/{endpoint}", self.mode))
             .json(&payload)
             .send().await?
+            .error_for_status()?
             .json::<CreateOrderResponse>()
             .await
     }
