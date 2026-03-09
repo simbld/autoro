@@ -7,6 +7,8 @@ pub struct Config {
     pub etoro_user_key: String,
     pub bind_addr: String,
     pub cors_origin: Option<String>,
+    /// "demo" ou "real"
+    pub trading_mode: String,
     /// Symboles suivis, ex: "BTC,ETH,AAPL"
     pub trader_symbols: Vec<String>,
     /// Montant USD investi par trade
@@ -48,6 +50,7 @@ impl Config {
         let bind_addr = std::env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:8000".into());
         let cors_origin = std::env::var("CORS_ORIGIN").ok();
 
+        let trading_mode = std::env::var("TRADING_MODE").unwrap_or_else(|_| "demo".into());
         let trader_symbols = std::env::var("TRADER_SYMBOLS")
             .unwrap_or_else(|_| "BTC".into())
             .split(',')
@@ -76,6 +79,7 @@ impl Config {
             etoro_user_key,
             bind_addr,
             cors_origin,
+            trading_mode,
             trader_symbols,
             trader_amount,
             trader_leverage,
