@@ -29,7 +29,7 @@ pub fn app_router(etoro_client: EtoroClient) -> Router {
         .route("/api/instruments/search", get(search_instrument))
         .route("/api/instruments/rates", get(get_rates))
         .route("/api/portfolio", get(get_portfolio))
-        .route("/api/positions/:id/close", post(close_position))
+        .route("/api/positions/{id}/close", post(close_position))
         .route("/api/history", get(get_history))
         .with_state(state)
 }
@@ -106,14 +106,9 @@ async fn get_portfolio(
     }
 }
 
-#[derive(Deserialize)]
-struct ClosePositionPath {
-    id: i64,
-}
-
 async fn close_position(
     State(state): State<AppState>,
-    axum::extract::Path(ClosePositionPath { id }): axum::extract::Path<ClosePositionPath>,
+    axum::extract::Path(id): axum::extract::Path<i64>,
     Json(payload): Json<ClosePositionRequest>,
 ) -> Result<Json<CreateOrderResponse>, StatusCode> {
     match state.etoro_client.close_position(id, payload).await {
