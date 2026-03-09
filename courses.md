@@ -92,3 +92,92 @@ Sans config, rien ne fonctionne. Sans serveur, personne n'entre.
 6. ss -tlnp | grep 8080
 5. 
    Puis relance cargo run.
+
+
+curl -X POST http://127.0.0.1:8081/api/orders \
+-H "Content-Type: application/json" \
+-d '{"symbol":"BTC","order_side":"buy","amount":100,"take_profit":null,"stop_loss":null}'
+
+
+curl -v -X POST http://127.0.0.1:8081/api/orders \
+-H "Content-Type: application/json" \
+-d '{"symbol":"BTC","order_side":"buy","amount":100,"take_profit":null,"stop_loss":null}'
+
+
+
+❯ que doit on faire pour continuer l'app ? parceque a coté de ça je prends des notes comme une sorte de mémo de            
+construction de l'app, que dois on fairre pour continuer  ?quel fichier doit ton s'occuper ? il faut respecter les       
+ajouts de code dasn un fichier, etape par etape afin que je puisse comprendre la logique, la on a ajouter les champs     
+dans models.rs donc pas de soucis
+
+● Laisse-moi lire l'état actuel des fichiers clés pour te donner un plan précis.
+
+● Read 3 files (ctrl+o to expand)
+
+● Voici l'état actuel et le plan de construction fichier par fichier :
+
+  ---
+Ce qui est fait ✅
+
+┌───────────┬─────────────────────────────────────────────────┐
+│  Fichier  │                      État                       │
+├───────────┼─────────────────────────────────────────────────┤
+│ models.rs │ Complet (vient d'être mis à jour)               │
+├───────────┼─────────────────────────────────────────────────┤
+│ main.rs   │ Complet                                         │
+├───────────┼─────────────────────────────────────────────────┤
+│ config.rs │ Complet                                         │
+├───────────┼─────────────────────────────────────────────────┤
+│ etoro.rs  │ Partiel — seulement send_order                  │
+├───────────┼─────────────────────────────────────────────────┤
+│ routes.rs │ Partiel — seulement /health et POST /api/orders │
+└───────────┴─────────────────────────────────────────────────┘
+
+  ---
+Plan de construction — étape par étape
+
+Étape 1 — etoro.rs (méthodes client manquantes)
+
+Ajouter dans l'ordre :
+1. search_instrument(symbol) → GET /market-data/search (résoudre BTC → instrument_id)
+2. get_rates(ids) → GET /market-data/instruments/rates (prix bid/ask)
+3. get_portfolio() → GET /trading/info/demo/pnl (positions + cash dispo)
+4. close_position(position_id, payload) → POST /trading/execution/market-close-orders/positions/{id}
+
+Étape 2 — routes.rs (routes manquantes)
+
+Pour chaque méthode ajoutée dans etoro.rs, on ajoute la route correspondante :
+1. GET /api/instruments/search?symbol=BTC
+2. GET /api/instruments/rates?ids=100000,1001
+3. GET /api/portfolio
+4. POST /api/positions/:id/close
+
+  ---
+On commence par etoro.rs, méthode search_instrument ?
+
+❯ tu es mon prof, dit moi par quoi commencer et n'oublie pas de me notifier l'avancement diu projet pour que je note les   
+étapes essentiel pour comprendre ce qu'on fait
+
+● Avancement du projet
+
+[✅] models.rs     — Structs API eToro complètes
+[✅] config.rs     — Chargement des variables d'environnement
+[✅] main.rs       — Démarrage serveur Axum + CORS
+[🔄] etoro.rs     — Client HTTP (1/4 méthodes implémentées)
+[🔄] routes.rs    — Routes Axum (2/6 routes implémentées)
+
+  ---
+Étape 1 → etoro.rs : méthode search_instrument
+
+Pourquoi on commence par là ?
+Toute l'app repose sur les instrument_id numériques. Sans pouvoir résoudre "BTC" → 100000, on ne peut ni trader, ni récupérer
+les prix. C'est la brique de base.
+
+Ce qu'on va ajouter dans etoro.rs :
+pub async fn search_instrument(&self, symbol: &str)
+-> Result<InstrumentSearchResponse, reqwest::Error>
+
+Elle appellera GET /api/v1/market-data/search?internalSymbolFull=BTC.
+
+  ---
+On y va ?
