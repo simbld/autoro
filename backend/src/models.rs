@@ -45,10 +45,13 @@ pub struct CreateOrderRequest {
 pub struct CreateOrderResponse(pub serde_json::Value);
 
 /// Requête pour fermer une position (totale ou partielle)
-/// Endpoint : POST /trading/execution/market-close-orders/positions/{positionId}
+/// Endpoint : POST /trading/execution/{mode}/market-close-orders/positions/{positionId}
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ClosePositionRequest {
+    /// Obligatoire en mode demo
+    #[serde(rename = "InstrumentID")]
+    pub instrument_id: i64,
     /// null = fermeture totale, valeur = fermeture partielle
     pub units_to_deduct: Option<f64>,
 }

@@ -81,12 +81,12 @@ impl EtoroClient {
     }
 
     pub async fn get_portfolio(&self) -> Result<ClientPortfolio, reqwest::Error> {
-        let resp = self.get(&format!("/api/v1/trading/info/{}/pnl", self.mode))
+        self.get(&format!("/api/v1/trading/info/{}/pnl", self.mode))
             .send().await?
             .error_for_status()?
             .json::<PortfolioResponse>()
-            .await?;
-        Ok(resp.client_portfolio)
+            .await
+            .map(|r| r.client_portfolio)
     }
 
     pub async fn close_position(
@@ -94,12 +94,15 @@ impl EtoroClient {
         position_id: i64,
         payload: ClosePositionRequest,
     ) -> Result<CreateOrderResponse, reqwest::Error> {
-        self.post(&format!("/api/v1/trading/execution/{}/market-close-orders/positions/{position_id}", self.mode))
+        let resp = self.post(&format!("/api/v1/trading/execution/{}/market-close-orders/positions/{position_id}", self.mode))
             .json(&payload)
-            .send().await?
-            .error_for_status()?
-            .json::<CreateOrderResponse>()
-            .await
+            .send().await?;
+        let status = resp.status();
+        let text = resp.text().await?;
+        tracing::debug!("close_position status={} body={}", status, text);
+        let value: serde_json::Value = serde_json::from_str(&text)
+            .unwrap_or(serde_json::json!({"raw": text, "status": status.as_u16()}));
+        Ok(CreateOrderResponse(value))
     }
 
     pub async fn get_history(&self, min_date: &str) -> Result<Vec<TradeHistoryItem>, reqwest::Error> {
