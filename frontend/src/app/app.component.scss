@@ -1,0 +1,46 @@
+.app-container {
+  height: 100vh;
+}
+
+mat-sidenav {
+  width: 250px;
+  padding: 25px 0;
+  background: #3a4b73ff;
+}
+
+mat-sidenav-content {
+  padding: 35px;
+  background: #232d45ff;
+}
+
+a {
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  width: 85%;
+  padding-left: 2px;
+  margin-left: 23px;
+}
+
+a.active {
+  cursor: pointer;
+  text-transform: uppercase;
+  background: rgba(46, 185, 211, 0.51);
+  padding-left: 1px;
+  margin-left: 22px;
+  transition: all 2s ease-in-out;
+
+}
+
+a:hover {
+  padding-left: 4px;
+  margin-left: 26px;
+  background: rgba(157, 215, 229, 0.51);
+  transition: all 2s ease-in-out;
+}
+
+mat-icon {
+  margin-right: 12px;
+  vertical-align: middle;
+}
