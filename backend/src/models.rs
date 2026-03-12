@@ -39,7 +39,7 @@ pub struct CreateOrderRequest {
 }
 
 /// Réponse brute de l'API eToro pour les ordres (format variable selon l'endpoint).
-/// On utilise serde_json::Value pour accepter n'importe quelle structure.
+/// On utilise `serde_json::Value` pour accepter n'importe quelle structure.
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct CreateOrderResponse(pub serde_json::Value);
@@ -58,6 +58,7 @@ pub struct ClosePositionRequest {
 
 /// Position ouverte dans le portfolio
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(clippy::struct_field_names)]
 #[serde(rename_all = "camelCase")]
 pub struct Position {
     #[serde(rename = "positionID")]
@@ -71,6 +72,10 @@ pub struct Position {
     pub open_rate: f64,
     pub stop_loss_rate: Option<f64>,
     pub take_profit_rate: Option<f64>,
+    #[serde(rename = "isTslEnabled", default)]
+    pub is_tsl_enabled: bool,
+    #[serde(rename = "tslRate", default)]
+    pub tsl_rate: Option<f64>,
 }
 
 /// Portfolio complet du client (réponse PnL)
