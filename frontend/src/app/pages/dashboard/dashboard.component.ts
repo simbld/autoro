@@ -30,6 +30,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.TradingService.getPortfolio().subscribe(d => this.portfolio = d);
     }
 
+    close(p: { positionID: number, instrumentID: number }) {
+        this.TradingService.closePosition(p.positionID, p.instrumentID).subscribe(() =>
+        this.load());
+    }
+
     ngOnDestroy() {
         this.sub.unsubscribe();
     }
