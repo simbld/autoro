@@ -1,1 +1,73 @@
-<p>dashboard works!</p>
+<div class="dashboard">
+
+  <mat-card class="balance-card">
+    <mat-card-content>
+      <span class="label">Solde disponible</span>
+      <span class="balance">{{ portfolio?.credit | number:'1.2-2' }} $</span>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="positions-card">
+    <mat-card-header>
+      <mat-card-title>Positions ouvertes</mat-card-title>
+      <span class="spacer"></span>
+      <button mat-icon-button (click)="load()" title="Rafraîchir">↻</button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p *ngIf="!portfolio">Chargement…</p>
+      <p *ngIf="portfolio && portfolio.positions.length === 0">Aucune position ouverte.</p>
+
+      <table mat-table [dataSource]="portfolio?.positions ?? []" *ngIf="portfolio && portfolio.positions.length > 0">
+
+        <ng-container matColumnDef="instrument">
+          <th mat-header-cell *matHeaderCellDef>Instrument</th>
+          <td mat-cell *matCellDef="let p">{{ p.instrumentID }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="direction">
+          <th mat-header-cell *matHeaderCellDef>Direction</th>
+          <td mat-cell *matCellDef="let p" [class.buy]="p.isBuy" [class.sell]="!p.isBuy">
+            {{ p.isBuy ? 'BUY' : 'SELL' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="openRate">
+          <th mat-header-cell *matHeaderCellDef>Prix entrée</th>
+          <td mat-cell *matCellDef="let p">{{ p.openRate | number:'1.2-5' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef>Montant</th>
+          <td mat-cell *matCellDef="let p">{{ p.amount | number:'1.2-2' }} $</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sl">
+          <th mat-header-cell *matHeaderCellDef>Stop Loss</th>
+          <td mat-cell *matCellDef="let p">{{ p.stopLossRate ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="tp">
+          <th mat-header-cell *matHeaderCellDef>Take Profit</th>
+          <td mat-cell *matCellDef="let p">{{ p.takeProfitRate ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="tsl">
+          <th mat-header-cell *matHeaderCellDef>TSL</th>
+          <td mat-cell *matCellDef="let p">{{ p.isTslEnabled ? (p.tslRate ?? '—') : '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="close">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let p">
+            <button mat-stroked-button color="warn" (click)="close(p)">Fermer</button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let position; columns: columns;" [class.buy-row]="position.isBuy" [class.sell-row]="!position.isBuy"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+</div>
