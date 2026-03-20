@@ -30,7 +30,7 @@ pub struct CreateOrderRequest {
     /// Taux de stop-loss (optionnel)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stop_loss_rate: Option<f64>,
-    /// Taux de take-profit (optionnel)
+    /// Taux de take-profit (optionnel)F
     #[serde(skip_serializing_if = "Option::is_none")]
     pub take_profit_rate: Option<f64>,
     /// Stop-loss suiveur (optionnel)
