@@ -1,6 +1,6 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import { MatCardModule} from "@angular/material/card";
-import {interval,  Subscription, switchMap} from "rxjs";
+import {forkJoin, interval, Subscription} from "rxjs";
 import {
     InstrumentRate,
     TradingService
@@ -20,7 +20,12 @@ export class AssetsComponent implements OnInit, OnDestroy{
     private TradingService = inject(TradingService);
     private sub!: Subscription;
     public rates: InstrumentRate[] = [];
-    public columns = ['instrumentID', 'ask', 'bid'];
+    public columns = ['instrumentID', 'ask', 'bid', 'price'];
+    public instrumentName: { [key: number]: string } = {
+        100063: 'SOL',
+        100001: 'ETH',
+        100000: 'BTC'
+    };
 
     ngOnInit() {
         this.load();
@@ -28,16 +33,16 @@ export class AssetsComponent implements OnInit, OnDestroy{
     }
 
     load() {
-        this.TradingService.searchInstrument('SOL')
-            .pipe(
-                switchMap(response => {
-                    const id = response.items[0].instrumentId;
-                    return this.TradingService.getRates(id.toString());
-                    }
-                )
-            )
-        .subscribe(d => {
-                this.rates = d.rates;
+        forkJoin([
+            this.TradingService.getRates('100063'),
+            this.TradingService.getRates('100001'),
+            this.TradingService.getRates('100000')
+        ]).subscribe({
+            next: responses => {
+                this.rates = responses.flatMap(r => r.rates);
+                console.log('rates', this.rates);
+            },
+            error: e => console.error('erreur', e)
         });
     }
 
