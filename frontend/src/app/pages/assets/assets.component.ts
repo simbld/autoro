@@ -1,6 +1,7 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import { MatCardModule} from "@angular/material/card";
 import {forkJoin, interval, Subscription} from "rxjs";
+import { Router } from '@angular/router';
 import {
     InstrumentRate,
     TradingService
@@ -17,7 +18,8 @@ import {MatButtonModule} from "@angular/material/button";
 })
 
 export class AssetsComponent implements OnInit, OnDestroy{
-    private TradingService = inject(TradingService);
+    private tradingService = inject(TradingService);
+    private router = inject(Router);
     private sub!: Subscription;
     public rates: InstrumentRate[] = [];
     public columns = ['instrumentID', 'ask', 'bid', 'price'];
@@ -27,6 +29,10 @@ export class AssetsComponent implements OnInit, OnDestroy{
         100000: 'BTC'
     };
 
+    goToMarkets(instrumentId: number) {
+        void this.router.navigate(['/markets', instrumentId]);
+    }
+
     ngOnInit() {
         this.load();
         this.sub = interval(30000).subscribe(() => this.load());
@@ -34,9 +40,9 @@ export class AssetsComponent implements OnInit, OnDestroy{
 
     load() {
         forkJoin([
-            this.TradingService.getRates('100063'),
-            this.TradingService.getRates('100001'),
-            this.TradingService.getRates('100000')
+            this.tradingService.getRates('100063'),
+            this.tradingService.getRates('100001'),
+            this.tradingService.getRates('100000')
         ]).subscribe({
             next: responses => {
                 this.rates = responses.flatMap(r => r.rates);
