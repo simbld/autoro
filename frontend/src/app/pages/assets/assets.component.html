@@ -1,1 +1,43 @@
-<p>assets works!</p>
+<div class="container">
+
+    <mat-card class="table-card">
+        <mat-card-header>
+            <mat-card-title>Crypto-monnaies</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <p *ngIf="!rates.length">Chargement…</p>
+
+            <table mat-table [dataSource]="rates" *ngIf="rates.length && rates.length > 0">
+
+                <ng-container matColumnDef="instrumentID">
+                    <th mat-header-cell *matHeaderCellDef>Pièces</th>
+                    <td mat-cell *matCellDef="let item">{{ instrumentName[item.instrumentID] }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="ask">
+                    <th mat-header-cell *matHeaderCellDef>Prix d'achat</th>
+                    <td mat-cell *matCellDef="let item ">{{item.ask}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="bid">
+                    <th mat-header-cell *matHeaderCellDef>Prix de vente</th>
+                    <td mat-cell *matCellDef="let item">{{item.bid}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="price">
+                    <th mat-header-cell *matHeaderCellDef>Prix</th>
+                    <td mat-cell *matCellDef="let item">{{ (item.ask + item.bid) /2 | number:'1.2-2' }}</td>>
+                    </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="columns"></tr>
+                <tr mat-row *matRowDef="let row; columns: columns;"
+                    (click)="goToMarkets(row.instrumentID)"
+                    style="cursor: pointer;">
+                </tr>
+            </table>
+
+        </mat-card-content>
+    </mat-card>
+
+</div>

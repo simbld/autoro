@@ -134,7 +134,7 @@ fn macd_vote(prices: &[f64]) -> i8 {
 
 // ── Signal composite ─────────────────────────────────────────────────────────
 
-/// Vote 3/4 : signal retourné seulement si au moins 3 indicateurs sont d'accord.
+/// Vote 2/4 : signal retourné si au moins 2 indicateurs sont d'accord.
 /// Minimum 35 prix requis (contrainte MACD : 26 + 9).
 pub fn compute_signal(prices: &[f64]) -> Signal {
     if prices.len() < 35 {
@@ -154,9 +154,9 @@ pub fn compute_signal(prices: &[f64]) -> Signal {
         votes[0], votes[1], votes[2], votes[3], buy_count, sell_count
     );
 
-    if buy_count >= 3 {
+    if buy_count >= 2 {
         Signal::Buy
-    } else if sell_count >= 3 {
+    } else if sell_count >= 2 {
         Signal::Sell
     } else {
         Signal::Hold

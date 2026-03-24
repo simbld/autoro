@@ -85,11 +85,16 @@ impl Trader {
         // 2. Portfolio (positions ouvertes) — optionnel, on utilise local_open en fallback
         let open_positions: HashMap<i64, crate::models::Position> = match self.client.get_portfolio().await {
             Ok(p) => {
-                self.local_open = p.positions.iter().map(|pos| pos.instrument_id).collect();
+                // Ne mettre à jour local_open que si le portfolio contient des données
+                // (en demo l'API renvoie souvent 0 positions même après ouverture)
+                if !p.positions.is_empty() {
+                    self.local_open = p.positions.iter().map(|pos| pos.instrument_id).collect();
+                }
                 tracing::info!(
-                    "Tick — solde: ${:.2} | positions ouvertes: {}",
+                    "Tick — solde: ${:.2} | positions ouvertes: {} (local: {})",
                     p.credit,
-                    p.positions.len()
+                    p.positions.len(),
+                    self.local_open.len()
                 );
                 p.positions.into_iter().map(|p| (p.instrument_id, p)).collect()
             }
