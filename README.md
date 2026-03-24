@@ -10,7 +10,7 @@ The API key is stored exclusively on the backend and must never be exposed to th
 ## 🏗 Architecture
 
 ```
-React + TypeScript (UI)
+Angular + TypeScript (UI)
         ↓ HTTP
 Rust Backend (Axum API)
         ↓ HTTP
@@ -29,7 +29,7 @@ eToro API (Demo or Real)
 - dotenvy (environment management)
 
 ### Frontend
-- React
+- Angular
 - TypeScript
 - Vite
 
@@ -48,6 +48,7 @@ rustc --version
 cargo --version
 node --version
 npm --version
+ng version
 ```
 
 ---
@@ -117,7 +118,7 @@ Expected response:
 ```bash
 cd frontend
 npm install
-npm run dev
+ng serve
 ```
 
 Frontend runs at:
@@ -142,7 +143,9 @@ http://localhost:5173
 
 /frontend
     package.json
+    angular.json
     src/
+        app/
 ```
 
 ---
