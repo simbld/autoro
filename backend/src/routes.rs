@@ -40,7 +40,6 @@ async fn health() -> Json<Health> {
         ok: true,
     })
 }
-
 async fn create_order(
     State(state): State<AppState>,
     Json(payload): Json<CreateOrderRequest>,
@@ -94,7 +93,6 @@ async fn get_rates(
         }
     }
 }
-
 async fn get_portfolio(
     State(state): State<AppState>,
 ) -> Result<Json<ClientPortfolio>, StatusCode> {
