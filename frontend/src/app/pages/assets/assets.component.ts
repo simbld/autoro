@@ -30,7 +30,8 @@ export class AssetsComponent implements OnInit, OnDestroy{
     };
 
     goToMarkets(instrumentId: number) {
-        void this.router.navigate(['/markets', instrumentId]);
+        let symbol = this.instrumentName[instrumentId]
+        void this.router.navigate(['/markets', symbol]);
     }
 
     ngOnInit() {
