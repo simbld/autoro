@@ -118,6 +118,8 @@ pub struct InstrumentSearchItem {
     pub instrument_id: i64,
     pub internal_symbol_full: String,
     pub instrument_display_name: Option<String>,
+	pub daily_price_change: Option<f64>,
+	pub abs_daily_price_change: Option<f64>,
 }
 
 /// Réponse complète de la recherche d'instruments
