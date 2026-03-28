@@ -1,5 +1,4 @@
 // /backend/src/etoro.rs
-
 use reqwest::Client;
 use uuid::Uuid;
 use crate::models::{

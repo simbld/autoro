@@ -118,6 +118,8 @@ pub struct InstrumentSearchItem {
     pub instrument_id: i64,
     pub internal_symbol_full: String,
     pub instrument_display_name: Option<String>,
+	pub daily_price_change: Option<f64>,
+	pub abs_daily_price_change: Option<f64>,
 }
 
 /// Réponse complète de la recherche d'instruments
@@ -132,15 +134,12 @@ pub struct InstrumentSearchResponse {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstrumentRate {
-    #[serde(rename = "instrumentID")]
-    pub instrument_id: i64,
-    /// Prix d'achat (ask)
-    pub ask: f64,
-    /// Prix de vente (bid)
-    pub bid: f64,
-    /// Prix de la dernière exécution
-    pub last_execution: Option<f64>,
-    pub date: Option<chrono::DateTime<chrono::Utc>>,
+		#[serde(rename = "instrumentID")]
+		pub instrument_id: i64,
+		pub ask: f64,
+		pub bid: f64,
+		pub last_execution: Option<f64>,
+		pub date: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 /// Réponse de l'endpoint des taux de marché
