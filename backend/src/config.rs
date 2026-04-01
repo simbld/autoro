@@ -21,6 +21,8 @@ pub struct Config {
     pub trader_window_size: usize,
     /// Nombre de confirmations consécutives requises avant d'agir
     pub trader_confirm_ticks: i8,
+    /// Clé API CityFalcon (optionnelle — sans clé, la route news renvoie 503)
+    pub cityfalcon_api_key: Option<String>,
 }
 
 impl std::fmt::Debug for Config {
@@ -79,6 +81,8 @@ impl Config {
             .parse::<i8>()
             .unwrap_or(3);
 
+        let cityfalcon_api_key = std::env::var("CITYFALCON_API_KEY").ok();
+
         Ok(Self {
             etoro_base_url,
             etoro_api_key,
@@ -92,6 +96,7 @@ impl Config {
             trader_interval_secs,
             trader_window_size,
             trader_confirm_ticks,
+            cityfalcon_api_key,
         })
     }
 }
