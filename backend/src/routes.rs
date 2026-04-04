@@ -12,16 +12,18 @@ use serde::Deserialize;
 use crate::etoro::EtoroClient;
 use crate::models::{
     ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse, Health,
-    InstrumentRatesResponse, InstrumentSearchResponse, TradeHistoryItem,
+    InstrumentRatesResponse, InstrumentSearchResponse, NewsResponse, TradeHistoryItem,
 };
+use crate::news;
 
 #[derive(Clone)]
 pub struct AppState {
     pub etoro_client: EtoroClient,
+    pub cityfalcon_api_key: Option<String>,
 }
 
-pub fn app_router(etoro_client: EtoroClient) -> Router {
-    let state = AppState { etoro_client };
+pub fn app_router(etoro_client: EtoroClient, cityfalcon_api_key: Option<String>) -> Router {
+    let state = AppState { etoro_client, cityfalcon_api_key };
 
     Router::new()
         .route("/health", get(health))
@@ -31,6 +33,7 @@ pub fn app_router(etoro_client: EtoroClient) -> Router {
         .route("/api/portfolio", get(get_portfolio))
         .route("/api/positions/{id}/close", post(close_position))
         .route("/api/history", get(get_history))
+        .route("/api/instruments/news", get(get_news))
         .with_state(state)
 }
 
