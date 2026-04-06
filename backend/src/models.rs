@@ -148,17 +148,16 @@ pub struct InstrumentRatesResponse {
     pub rates: Vec<InstrumentRate>,
 }
 
-/// Article d'actualité enrichi (réponse CityFalcon)
+/// Article d'actualité (réponse NewsAPI.org)
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewsArticle {
-    pub uuid: String,
     pub title: String,
     pub description: Option<String>,
     pub url: String,
-    pub publish_time: String,
+    pub image_url: Option<String>,
+    pub published_at: String,
     pub source_name: String,
-    pub cityfalcon_score: f64,
 }
 
 /// Réponse de la route /api/instruments/news
