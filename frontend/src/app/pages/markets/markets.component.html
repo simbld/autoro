@@ -1,0 +1,20 @@
+<div class="market">
+    <mat-card>
+        <mat-card-content>
+            <h2>{{ symbol }}</h2>
+            <p>{{ price | number:'1.2-2' }} $</p>
+            <p [class.positive]="variationDay ?? 0 > 0" [class.negative]="variationDay ?? 0 < 0">
+                {{ absDailyPriceChange | number:'1.2-2' }} ({{ variationDay | number:'1.2-2' }}%)
+            </p>
+        </mat-card-content>
+    </mat-card>
+    <mat-tab-group (selectedTabChange)="onTabChange($event)">
+        <mat-tab label="Vue d'ensemble">
+        </mat-tab>
+        <mat-tab label="Graphique">
+            <div id="tradingview-widget"></div>
+        </mat-tab>
+        <mat-tab label="Actualité">
+        </mat-tab>
+    </mat-tab-group>
+</div>
