@@ -19,11 +19,11 @@ use crate::news;
 #[derive(Clone)]
 pub struct AppState {
     pub etoro_client: EtoroClient,
-    pub cityfalcon_api_key: Option<String>,
+    pub news_api_key: Option<String>,
 }
 
-pub fn app_router(etoro_client: EtoroClient, cityfalcon_api_key: Option<String>) -> Router {
-    let state = AppState { etoro_client, cityfalcon_api_key };
+pub fn app_router(etoro_client: EtoroClient, news_api_key: Option<String>) -> Router {
+    let state = AppState { etoro_client, news_api_key };
 
     Router::new()
         .route("/health", get(health))
@@ -58,7 +58,7 @@ async fn create_order(
 
 #[derive(Deserialize)]
 struct SearchQuery {
-    symbol: String,
+    symbol: String
 }
 
 async fn search_instrument(
@@ -76,7 +76,7 @@ async fn search_instrument(
 
 #[derive(Deserialize)]
 struct RatesQuery {
-    ids: String,
+    ids: String
 }
 
 async fn get_rates(
@@ -140,4 +140,26 @@ async fn get_history(
             Err(StatusCode::BAD_GATEWAY)
         }
     }
+}
+
+#[derive(Deserialize)]
+struct NewsQuery {
+	symbol: String
+}
+
+async fn get_news(
+	State(state): State<AppState>,
+    Query(params): Query<NewsQuery>,
+) -> Result<Json<NewsResponse>, StatusCode>{
+	let Some(key) = &state.news_api_key else {
+		return Err(StatusCode::SERVICE_UNAVAILABLE);
+	};
+
+	match news::fetch_news(key, &params.symbol).await {
+		Ok(response) => Ok(Json(response)),
+		Err(e) => {
+			tracing::error!("get_news failed: {:?}", e);
+			Err(StatusCode::BAD_GATEWAY)
+		}
+	}
 }
