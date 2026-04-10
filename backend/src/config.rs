@@ -33,13 +33,14 @@ impl std::fmt::Debug for Config {
             .field("etoro_user_key", &"[REDACTED]")
             .field("bind_addr", &self.bind_addr)
             .field("cors_origin", &self.cors_origin)
+			.field("news_api_key", &self.news_api_key)
             .finish()
     }
 }
 
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
-    #[error("Missing environment variable: {0}")]
+    #[error("Missing environment variable : {0}")]
     MissingVar(&'static str),
 }
 
