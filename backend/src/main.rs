@@ -7,6 +7,7 @@ mod models;
 mod routes;
 mod strategy;
 mod trader;
+mod news;
 
 use axum::Router;
 use config::Config;
@@ -18,7 +19,6 @@ use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() {
-    // Cherche .env dans le répertoire courant, puis dans backend/ (workspace root)
     dotenvy::dotenv()
         .or_else(|_| dotenvy::from_filename("backend/.env"))
         .ok();
@@ -42,7 +42,7 @@ async fn main() {
 	  .allow_headers(Any)
 	  .allow_methods(Any);
 
-    let app: Router = app_router(etoro).layer(cors);
+    let app: Router = app_router(etoro, cfg.news_api_key).layer(cors);
 
     let addr: SocketAddr = cfg.bind_addr.parse().expect("Invalid BIND_ADDR");
     tracing::info!("listening on https://{}", addr);
