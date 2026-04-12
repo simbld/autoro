@@ -1,5 +1,5 @@
-// /backend/src/news.rs
-// Client NewsAPI.org pour récupérer les actualités d'un instrument
+//! /backend/src/news.rs
+//! Client NewsAPI.org pour récupérer les actualités d'un instrument
 
 use reqwest::Client;
 use serde::Deserialize;
@@ -52,17 +52,28 @@ pub async fn fetch_news(
     let client = Client::new();
     let url = format!(
         "https://newsapi.org/v2/everything\
-         ?q={}\
+         ?q={query}\
          &language=en\
          &sortBy=publishedAt\
          &pageSize=20\
-         &apiKey={}",
-        query, api_key
+         &apiKey={api_key}"
     );
 
-    let resp: NewsApiResponse = client.get(&url).send().await?.json().await?;
+	let raw = client
+		.get(&url)
+		.header("User-Agent", "autoro-trader/1.0")
+		.send()
+		.await?
+		.text()
+		.await?;
+	
+	tracing::info!("NewsAPI raw: {}", &raw[..200.min(raw.len())]);
+	let resp: NewsApiResponse = serde_json::from_str(&raw).unwrap_or_else(|e| {
+		tracing::error!("NewsAPI parse error: {:?}", e);
+		NewsApiResponse { articles: vec![] }
+	});
 
-    let articles: Vec<NewsArticle> = resp
+	let articles: Vec<NewsArticle> = resp
         .articles
         .into_iter()
         .filter(|a| a.title.as_deref().unwrap_or("") != "[Removed]")
