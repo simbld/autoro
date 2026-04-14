@@ -21,6 +21,8 @@ pub struct Config {
     pub trader_window_size: usize,
     /// Nombre de confirmations consécutives requises avant d'agir
     pub trader_confirm_ticks: i8,
+    /// Clé API NewsAPI.org (optionnelle — sans clé, la route news renvoie 503)
+    pub news_api_key: Option<String>,
 }
 
 impl std::fmt::Debug for Config {
@@ -31,13 +33,14 @@ impl std::fmt::Debug for Config {
             .field("etoro_user_key", &"[REDACTED]")
             .field("bind_addr", &self.bind_addr)
             .field("cors_origin", &self.cors_origin)
+			.field("news_api_key", &self.news_api_key)
             .finish()
     }
 }
 
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
-    #[error("Missing environment variable: {0}")]
+    #[error("Missing environment variable : {0}")]
     MissingVar(&'static str),
 }
 
@@ -79,6 +82,8 @@ impl Config {
             .parse::<i8>()
             .unwrap_or(3);
 
+        let news_api_key = std::env::var("NEWS_API_KEY").ok();
+
         Ok(Self {
             etoro_base_url,
             etoro_api_key,
@@ -92,6 +97,7 @@ impl Config {
             trader_interval_secs,
             trader_window_size,
             trader_confirm_ticks,
+            news_api_key,
         })
     }
 }

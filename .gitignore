@@ -11,3 +11,6 @@ backend/target/
 # OS
 .DS_Store
 courses.md
+
+# Stakpak session files
+.stakpak/session*

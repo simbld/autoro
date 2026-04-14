@@ -1,0 +1,11 @@
+mat-card {
+  margin-bottom: 16px;
+  cursor: pointer;
+
+}
+
+.positive { color: #4caf50; }
+.negative { color: #f44336; }
+
+.positive::before { content: '▲ +'; }
+.negative::before { content: '▼ -'; }
