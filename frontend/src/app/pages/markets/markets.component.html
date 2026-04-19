@@ -15,6 +15,12 @@
             <div id="tradingview-widget"></div>
         </mat-tab>
         <mat-tab label="Actualité">
+            @for (article of articles; track article.url) {
+                <div>
+                    <a [href]="article.url" target="_blank">{{ article.title }}</a>
+                    <p>{{ article.sourceName }} — {{ article.publishedAt }}</p>
+                </div>
+            }
         </mat-tab>
     </mat-tab-group>
 </div>
