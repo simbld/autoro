@@ -47,7 +47,7 @@ export interface InstrumentSearchResponse {
 }
 
 export interface NewsArticle {
-    titre: string;
+    title: string;
     description: string;
     url: string;
     imageUrl: string;
