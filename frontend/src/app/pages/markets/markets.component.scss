@@ -9,3 +9,17 @@ mat-card {
 
 .positive::before { content: '▲ +'; }
 .negative::before { content: '▼ -'; }
+
+.article-card {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #333;
+}
+
+.article-image {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
