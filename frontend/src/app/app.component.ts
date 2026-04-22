@@ -11,5 +11,8 @@ import {MatIconModule} from "@angular/material/icon";
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'frontend';
+  collapsed = true;
+  toggle() {
+    this.collapsed = !this.collapsed;
+  }
 }
