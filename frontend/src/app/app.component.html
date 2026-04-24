@@ -1,21 +1,39 @@
 <mat-sidenav-container class="app-container">
 
-    <mat-sidenav mode="side" opened>
+    <mat-sidenav mode="side" opened [class.collapsed]="collapsed">
+        <div class="nav-header">
+            @if (!collapsed) {
+                <img src="otoro.png" class="logo-img" alt="Otoro Logo" />
+            }
+            <button class="toggle-btn" (click)="toggle()">
+                <mat-icon>menu_open</mat-icon>
+            </button>
+        </div>
         <mat-nav-list>
-            <a mat-list-item routerLink="/home" routerLinkActive="active">
-                <mat-icon>home</mat-icon> Home
+            <a mat-list-item routerLink="/home" routerLinkActive="active"
+               [matTooltip]="collapsed ? 'Home' : ''" matTooltipPosition="right">
+                <mat-icon>home</mat-icon>
+                <span class="nav-label">Accueil</span>
             </a>
-            <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
-                <mat-icon>dashboard</mat-icon> Dashboard
+            <a mat-list-item routerLink="/dashboard" routerLinkActive="active"
+               [matTooltip]="collapsed ? 'Dashboard' : ''" matTooltipPosition="right">
+                <mat-icon>dashboard</mat-icon>
+                <span class="nav-label">Tableau de bord</span>
             </a>
-            <a mat-list-item routerLink="/assets" routerLinkActive="active">
-                <mat-icon>show_chart</mat-icon> Assets
+            <a mat-list-item routerLink="/assets" routerLinkActive="active"
+               [matTooltip]="collapsed ? 'Assets' : ''" matTooltipPosition="right">
+                <mat-icon>show_chart</mat-icon>
+                <span class="nav-label">Actifs</span>
             </a>
-            <a mat-list-item routerLink="settings" routerLinkActive="active">
-                <mat-icon>settings</mat-icon> Settings
+            <a mat-list-item routerLink="/settings" routerLinkActive="active"
+               [matTooltip]="collapsed ? 'Settings' : ''" matTooltipPosition="right">
+                <mat-icon>settings</mat-icon>
+                <span class="nav-label">Paramètre</span>
             </a>
-            <a mat-list-item routerLink="profile" routerLinkActive="active">
-                <mat-icon>account_circle</mat-icon> Profile
+            <a mat-list-item routerLink="/profile" routerLinkActive="active"
+               [matTooltip]="collapsed ? 'Profile' : ''" matTooltipPosition="right">
+                <mat-icon>account_circle</mat-icon>
+                <span class="nav-label">Wallet</span>
             </a>
         </mat-nav-list>
     </mat-sidenav>
