@@ -46,6 +46,15 @@ export interface InstrumentSearchResponse {
     items: InstrumentSearchItem [];
 }
 
+export interface NewsArticle {
+    title: string;
+    description: string;
+    url: string;
+    imageUrl: string;
+    publishedAt: number;
+    sourceName: string;
+}
+
 @Injectable({
     providedIn: "root"
 })
@@ -67,5 +76,9 @@ export class TradingService {
 
     searchInstrument(symbol: string): Observable<InstrumentSearchResponse> {
         return  this.http.get<InstrumentSearchResponse>(`${this.api}/instruments/search?symbol=${symbol}`);
+    }
+
+    getNews(symbol: string): Observable<{articles: NewsArticle[]}> {
+        return  this.http.get<{articles: NewsArticle[]}>(`${this.api}/instruments/news?symbol=${symbol}`);
     }
 }

@@ -1,6 +1,6 @@
 import {Component, inject, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {TradingService} from "../../services/trading.service";
+import {NewsArticle, TradingService} from "../../services/trading.service";
 import {switchMap} from "rxjs";
 import {MatCard, MatCardContent} from "@angular/material/card";
 import {DecimalPipe} from "@angular/common";
@@ -26,6 +26,7 @@ export class MarketsComponent implements OnInit{
     public variationDay: number | null = null;
     public absDailyPriceChange: number | null = null;
     private widgetLoaded = false
+    public articles: NewsArticle[] = [];
     private loadTradingViewWidget() {
         const script = document.createElement('script');
         script.src = 'https://s3.tradingview.com/tv.js';
@@ -50,6 +51,12 @@ export class MarketsComponent implements OnInit{
         if(event.index === 1 && !this.widgetLoaded) {
             this.widgetLoaded = true;
             this.loadTradingViewWidget();
+        }
+
+        if(event.index === 2 && this.articles.length === 0) {
+            this.tradingService.getNews(this.symbol!).subscribe(res => {
+                this.articles = res.articles;
+            })
         }
     }
 

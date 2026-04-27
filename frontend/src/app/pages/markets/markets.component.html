@@ -15,6 +15,17 @@
             <div id="tradingview-widget"></div>
         </mat-tab>
         <mat-tab label="Actualité">
+            @for (article of articles; track article.url) {
+                <div class="article-card">
+                    @if (article.imageUrl) {
+                        <img class="article-image" [src]="article.imageUrl" alt="{{article.title}}">
+                    }
+                    <div class="article-content">
+                    <a class="article-title" [href]="article.url" target="_blank">{{ article.title }}</a>
+                    <p>{{ article.sourceName }} — {{ article.publishedAt }}</p>
+                </div>
+            </div>
+            }
         </mat-tab>
     </mat-tab-group>
 </div>
