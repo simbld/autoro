@@ -40,7 +40,7 @@ mat-sidenav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 16px 12px;
+  padding: 0px 16px 12px;
   border-bottom: 1px solid #1e2a40;
 }
 
@@ -54,9 +54,10 @@ mat-sidenav {
 }
 
 .logo-img {
-  margin-left: 30px;
-  width: 110px;
-  height: 110px;
+  padding-top: 40px;
+  margin: 15px;
+  width: 150px;
+  height: 150px;
 }
 
 .toggle-btn {
@@ -66,7 +67,6 @@ mat-sidenav {
   color: #919399;
   display: flex;
   align-items: center;
-  padding: 4px;
   transition: color 0.5s ease-in-out, background 0.5s ease-in-out;
 
   &:hover {
