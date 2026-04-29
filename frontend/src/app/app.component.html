@@ -6,7 +6,7 @@
                 <img src="otoro.png" class="logo-img" alt="Otoro Logo" />
             }
             <button class="toggle-btn" (click)="toggle()">
-                <mat-icon>menu_open</mat-icon>
+                <mat-icon  [class.rotated]="collapsed">menu_open</mat-icon>
             </button>
         </div>
         <mat-nav-list>
