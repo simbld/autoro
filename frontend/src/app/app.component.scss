@@ -6,11 +6,18 @@
 }
 
 mat-sidenav {
+  --mat-sidenav-container-shape: 0px;
   width: 430px;
   background: #232733;
   border-right: 1px solid #1e2a40;
   transition: width 0.25s ease;
   overflow: hidden;
+
+  mat-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+  }
 
   mat-nav-list mat-icon {
     display: none;
@@ -19,12 +26,24 @@ mat-sidenav {
   &.collapsed {
     width: 100px;
 
+    .nav-header {
+      justify-content: center;
+    }
+
+    mat-nav-list {
+      gap: 40px;
+    }
+
     mat-nav-list mat-icon {
       display: inline-flex;
       color: #ffffff;
+      font-size: 30px;
+      width: 30px;
+      height: 30px;
     }
 
     .nav-label { display: none; }
+
     .logo { display: none; }
 
     a {
@@ -36,11 +55,26 @@ mat-sidenav {
   }
 }
 
+.app-container.collapsed mat-sidenav-content {
+  margin-left: 100px !important;
+}
+
+.app-container:not(.collapsed) mat-sidenav-content {
+  margin-left: 430px !important;
+}
+
+mat-sidenav-content {
+  background: #1c1f29;
+  color: #fbfbfb;
+  padding: 32px;
+  transition: margin-left 0.25s ease !important;
+}
+
 .nav-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 16px 12px;
+  padding: 30px 18px 100px 18px;
   border-bottom: 1px solid #1e2a40;
 }
 
@@ -54,8 +88,9 @@ mat-sidenav {
 }
 
 .logo-img {
-  padding-top: 40px;
-  margin: 15px;
+  padding-top: 95px;
+  padding-left: 10px;
+  margin-top: -80px;
   width: 150px;
   height: 150px;
 }
@@ -67,6 +102,7 @@ mat-sidenav {
   color: #919399;
   display: flex;
   align-items: center;
+  padding: 4px;
   transition: color 0.5s ease-in-out, background 0.5s ease-in-out;
 
   &:hover {
@@ -76,17 +112,16 @@ mat-sidenav {
 }
 
 .toggle-btn mat-icon {
-  --icon-size: 32px;
+  --icon-size: 36px;
   font-size: var(--icon-size);
   width: var(--icon-size);
   height: var(--icon-size);
   line-height: var(--icon-size);
 }
 
-mat-sidenav-content {
-  background: #1c1f29;
-  color: #fbfbfb;
-  padding: 32px;
+.toggle-btn mat-icon.rotated {
+  transform: rotate(180deg);
+  transition: transform 0.25s ease;
 }
 
 a {
