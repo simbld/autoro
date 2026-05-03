@@ -2,21 +2,17 @@
 
     <mat-sidenav mode="side" opened [class.collapsed]="collapsed">
         <div class="nav-header">
-            @if (!collapsed) {
-                <img src="otoro.png" class="logo-img" alt="Otoro Logo" />
-            }
+            <img
+                    src="otoro.png"
+                    class="logo-img"
+                    alt="Otoro Logo"
+                    [class.hidden]="collapsed"
+            />
             <button class="toggle-btn" (click)="toggle()">
                 <mat-icon  [class.rotated]="collapsed">menu_open</mat-icon>
             </button>
         </div>
-        <div class="backend-avatar-wrapper">
-            <div class="backend-avatar">
-                <mat-icon>power_settings_new</mat-icon>
-            </div>
-            @if (!collapsed) {
-                <span class="backend-label">Backend</span>
-            }
-        </div>
+        <app-plug [collapsed]="collapsed" />
         <mat-nav-list>
             <a mat-list-item routerLink="/home" routerLinkActive="active"
                [matTooltip]="collapsed ? 'Home' : ''" matTooltipPosition="right">
@@ -49,5 +45,4 @@
     <mat-sidenav-content>
         <router-outlet />
     </mat-sidenav-content>
-
 </mat-sidenav-container>
