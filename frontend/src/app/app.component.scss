@@ -37,33 +37,6 @@ a:hover:not(.active) {
   color: #c8d6e8;
 }
 
-.backend-avatar-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2px;
-  border: 2px solid #919399;
-  cursor: pointer;
-}
-
-.backend-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 2px solid #919399;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: #919399;
-  }
-}
-
 .backend-label {
   color: #ffffff;
   font-size: 14px;
@@ -86,6 +59,23 @@ a:hover:not(.active) {
   height: 150px;
 }
 
+.logo-img,
+.nav-label {
+  transition: opacity 200ms ease, width 200ms ease;
+}
+
+.logo-img.hidden,
+.collapsed .nav-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.toggle-btn .rotated {
+  transform: rotate(180deg);
+}
+
 .nav-header {
   display: flex;
   align-items: center;
@@ -102,7 +92,10 @@ a:hover:not(.active) {
 }
 
 mat-icon {
-  color: inherit;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #919399;
 }
 
 mat-sidenav {
