@@ -5,10 +5,11 @@ import {MatListModule} from "@angular/material/list";
 import {MatIconModule} from "@angular/material/icon";
 import {MatTooltip} from "@angular/material/tooltip";
 import {NgOptimizedImage} from "@angular/common";
+import {PlugComponent} from "./components/plug/plug.component";
 
 @Component({
   selector: 'app-root',
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, MatSidenavModule, MatListModule, MatIconModule, MatTooltip, NgOptimizedImage],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, MatSidenavModule, MatListModule, MatIconModule, MatTooltip, NgOptimizedImage, PlugComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

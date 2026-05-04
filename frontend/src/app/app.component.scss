@@ -5,43 +5,41 @@
   height: 100vh;
 }
 
-mat-sidenav {
-  width: 430px;
-  background: #232733;
-  border-right: 1px solid #1e2a40;
-  transition: width 0.25s ease;
-  overflow: hidden;
-
-  mat-nav-list mat-icon {
-    display: none;
-  }
-
-  &.collapsed {
-    width: 100px;
-
-    mat-nav-list mat-icon {
-      display: inline-flex;
-      color: #ffffff;
-    }
-
-    .nav-label { display: none; }
-    .logo { display: none; }
-
-    a {
-      justify-content: center;
-      padding: 0;
-      margin: 4px 8px;
-      width: calc(100% - 16px);
-    }
-  }
+.app-container.collapsed mat-sidenav-content {
+  margin-left: 100px !important;
 }
 
-.nav-header {
+.app-container:not(.collapsed) mat-sidenav-content {
+  margin-left: 430px !important;
+}
+
+a {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 16px 12px;
-  border-bottom: 1px solid #1e2a40;
+  color: #292e3d;
+  width: calc(100% - 16px);
+  margin: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+
+  mat-icon { min-width: 24px; }
+  color: #9fbba4;
+}
+
+a.active {
+  background: #292e3d;
+  color: #2eb9d0;
+  border-radius: 8px;
+}
+
+a:hover:not(.active) {
+  background: #1e2a40;
+  color: #c8d6e8;
+}
+
+.backend-label {
+  color: #ffffff;
+  font-size: 14px;
 }
 
 .logo {
@@ -54,9 +52,107 @@ mat-sidenav {
 }
 
 .logo-img {
-  margin-left: 30px;
-  width: 110px;
-  height: 110px;
+  padding-top: 95px;
+  padding-left: 10px;
+  margin-top: -80px;
+  width: 150px;
+  height: 150px;
+}
+
+.logo-img,
+.nav-label {
+  transition: opacity 200ms ease, width 200ms ease;
+}
+
+.logo-img.hidden,
+.collapsed .nav-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.toggle-btn .rotated {
+  transform: rotate(180deg);
+}
+
+.nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 18px 100px 18px;
+  border-bottom: 1px solid #1e2a40;
+}
+
+.nav-label {
+  margin-left: 12px;
+  font-size: 30px;
+  font-family: 'Open Sans';
+  color: #ffffff;
+}
+
+mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #919399;
+}
+
+mat-sidenav {
+  --mat-sidenav-container-shape: 0px;
+  width: 430px;
+  background: #232733;
+  border-right: 1px solid #1e2a40;
+  transition: width 0.25s ease;
+  overflow: hidden;
+
+  mat-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+  }
+
+  mat-nav-list mat-icon {
+    display: none;
+  }
+
+  &.collapsed {
+    width: 100px;
+
+    .nav-header {
+      justify-content: center;
+    }
+
+    mat-nav-list {
+      gap: 40px;
+    }
+
+    mat-nav-list mat-icon {
+      display: inline-flex;
+      color: #ffffff;
+      font-size: 30px;
+      width: 30px;
+      height: 30px;
+    }
+
+    .nav-label { display: none; }
+
+    .logo { display: none; }
+
+    a {
+      justify-content: center;
+      padding: 0;
+      margin: 4px 8px;
+      width: calc(100% - 16px);
+    }
+  }
+}
+
+mat-sidenav-content {
+  background: #1c1f29;
+  color: #fbfbfb;
+  padding: 32px;
+  transition: margin-left 0.25s ease !important;
 }
 
 .toggle-btn {
@@ -76,50 +172,14 @@ mat-sidenav {
 }
 
 .toggle-btn mat-icon {
-  --icon-size: 32px;
+  --icon-size: 36px;
   font-size: var(--icon-size);
   width: var(--icon-size);
   height: var(--icon-size);
   line-height: var(--icon-size);
 }
 
-mat-sidenav-content {
-  background: #1c1f29;
-  color: #fbfbfb;
-  padding: 32px;
-}
-
-a {
-  display: flex;
-  align-items: center;
-  color: #292e3d;
-  width: calc(100% - 16px);
-  margin: 4px 8px;
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s;
-
-  mat-icon { min-width: 24px; }
-  color: #9fbba4;
-}
-
-.nav-label {
-  margin-left: 12px;
-  font-size: 30px;
-  font-family: 'Open Sans';
-  color: #ffffff;
-}
-
-a.active {
-  background: #292e3d;
-  color: #2eb9d0;
-  border-radius: 8px;
-}
-
-a:hover:not(.active) {
-  background: #1e2a40;
-  color: #c8d6e8;
-}
-
-mat-icon {
-  color: inherit;
+.toggle-btn mat-icon.rotated {
+  transform: rotate(180deg);
+  transition: transform 0.25s ease;
 }
