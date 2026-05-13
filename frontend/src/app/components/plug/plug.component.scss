@@ -31,11 +31,14 @@ svg {
 .label-off {
   fill: #555;
   opacity: 1;
+  font-family: 'roboto', sans-serif;
+
 }
 
 .label-on {
   fill: #000000;
   opacity: 0;
+  font-family: 'roboto', sans-serif;
 }
 
 .cable {
