@@ -32,7 +32,7 @@
             <a mat-list-item routerLink="/settings" routerLinkActive="active"
                [matTooltip]="collapsed ? 'Settings' : ''" matTooltipPosition="right">
                 <mat-icon>settings</mat-icon>
-                <span class="nav-label">Paramètre</span>
+                <span class="nav-label">Paramètres</span>
             </a>
             <a mat-list-item routerLink="/profile" routerLinkActive="active"
                [matTooltip]="collapsed ? 'Profile' : ''" matTooltipPosition="right">
@@ -44,5 +44,12 @@
 
     <mat-sidenav-content>
         <router-outlet />
+
+        <mat-card class="balance-card">
+            <mat-card-content>
+                <span class="label">Solde disponible</span>
+            </mat-card-content>
+        </mat-card>
+
     </mat-sidenav-content>
 </mat-sidenav-container>
