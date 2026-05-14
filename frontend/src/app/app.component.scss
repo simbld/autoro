@@ -6,10 +6,12 @@
 }
 
 .app-container.collapsed mat-sidenav-content {
+  background: #13151c;
   margin-left: 100px !important;
 }
 
 .app-container:not(.collapsed) mat-sidenav-content {
+  background: #13151c;
   margin-left: 430px !important;
 }
 
@@ -46,7 +48,6 @@ a:hover:not(.active) {
   font-size: 18px;
   font-weight: 700;
   font-family: 'open-sans', sans-serif;
-  color: #ffffff;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -151,7 +152,6 @@ mat-sidenav {
 mat-sidenav-content {
   background: #1c1f29;
   color: #fbfbfb;
-  padding: 32px;
   transition: margin-left 0.25s ease !important;
 }
 

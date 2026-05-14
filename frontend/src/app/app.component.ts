@@ -4,12 +4,13 @@ import {MatSidenavModule} from "@angular/material/sidenav";
 import {MatListModule} from "@angular/material/list";
 import {MatIconModule} from "@angular/material/icon";
 import {MatTooltip} from "@angular/material/tooltip";
-import {NgOptimizedImage} from "@angular/common";
 import {PlugComponent} from "./components/plug/plug.component";
+import {DecimalPipe} from "@angular/common";
+import {MatCard, MatCardContent} from "@angular/material/card";
 
 @Component({
   selector: 'app-root',
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, MatSidenavModule, MatListModule, MatIconModule, MatTooltip, NgOptimizedImage, PlugComponent],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, MatSidenavModule, MatListModule, MatIconModule, MatTooltip, PlugComponent, DecimalPipe, MatCard, MatCardContent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

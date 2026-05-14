@@ -1,0 +1,80 @@
+<button
+        class="plug-card"
+        type="button"
+        (click)="toggle()"
+        [class.is-on]="isOn"
+        [class.collapsed]="collapsed"
+        [attr.aria-pressed]="isOn"
+>
+    <svg viewBox="0 0 550 400" role="img" aria-label="Animated plug connector">
+        <defs>
+            <linearGradient id="bgOff" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#d7d7d7" />
+                <stop offset="100%" stop-color="#9f9f9f" />
+            </linearGradient>
+
+            <linearGradient id="bgOn" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ff8a00" />
+                <stop offset="100%" stop-color="#ff4d00" />
+            </linearGradient>
+
+            <linearGradient id="plastic" x1="0" y1="0" x2="2" y2="1">
+                <stop offset="0%" stop-color="#0e0f0f" />
+                <stop offset="60%" stop-color="#eeeeee" />
+                <stop offset="100%" stop-color="#cfcfcf" />
+            </linearGradient>
+
+            <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f8f8f8" />
+                <stop offset="45%" stop-color="#9d9d9d" />
+                <stop offset="100%" stop-color="#f0f0f0" />
+            </linearGradient>
+
+            <filter id="shadow" filterUnits="userSpaceOnUse" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="30" stdDeviation="12" flood-opacity="0.25" />
+            </filter>
+
+            <filter id="plugShadow" filterUnits="userSpaceOnUse" x="-20%" y="-20%" width="160%" height="160%">
+                <feDropShadow dx="4" dy="16" stdDeviation="18" flood-opacity="0.45" />
+            </filter>
+        </defs>
+
+        <rect class="bg" width="550" height="310" rx="32" />
+
+        <text class="label label-off" x="42" y="110">OFF</text>
+        <text class="label label-on" x="42" y="110">ON</text>
+
+        <g class="left-plug" filter="url(#plugShadow)">
+        <g class="right-plug" filter="url(#plugShadow)">
+        <g filter="url(#shadow)">
+            <!-- left cable -->
+            <path class="cable" d="M0 210 C110 190, 180 198, 255 198" />
+
+            <!-- female plug -->
+            <g class="left-plug">
+                <rect x="250" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
+                <rect x="226" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
+                <rect x="435" y="115" width="42" height="150" rx="20" fill="url(#plastic)" />
+                <ellipse cx="456" cy="150" rx="13" ry="21" fill="#8f8f8f" />
+                <ellipse cx="456" cy="225" rx="13" ry="21" fill="#8f8f8f" />
+            </g>
+
+            <!-- right cable -->
+            <path class="cable right-cable" d="M645 198 C720 198, 800 205, 900 215" />
+
+            <!-- male plug -->
+            <g class="right-plug">
+                <rect x="610" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
+                <rect x="800" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
+                <rect x="592" y="115" width="42" height="150" rx="20" fill="url(#plastic)" />
+
+                <g class="pins">
+                    <rect x="525" y="145" width="85" height="24" rx="12" fill="url(#metal)" />
+                    <rect x="525" y="220" width="85" height="24" rx="12" fill="url(#metal)" />
+                </g>
+            </g>
+        </g>
+        </g>
+        </g>
+    </svg>
+</button>

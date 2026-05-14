@@ -1,12 +1,4 @@
 <div class="dashboard">
-
-  <mat-card class="balance-card">
-    <mat-card-content>
-      <span class="label">Solde disponible</span>
-      <span class="balance">{{ portfolio?.credit | number:'1.2-2' }} $</span>
-    </mat-card-content>
-  </mat-card>
-
   <mat-card class="positions-card">
     <mat-card-header>
       <mat-card-title>Positions ouvertes</mat-card-title>
@@ -63,7 +55,7 @@
         <ng-container matColumnDef="close">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let p">
-            <button mat-stroked-button color="warn" (click)="close(p)">Fermer</button>
+            <button mat-flat-button class="close-btn" (click)="close(p)">Fermer</button>
           </td>
         </ng-container>
 

@@ -1,0 +1,104 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.plug-card {
+  width: min(900px, 94vw);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+svg {
+  width: 100%;
+  display: block;
+}
+
+.bg {
+  fill: url(#bgOff);
+  transition: fill 450ms ease;
+}
+
+.label {
+  font-size: 100px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  transition: opacity 250ms ease;
+}
+
+.label-off {
+  fill: #555;
+  opacity: 1;
+  font-family: 'roboto', sans-serif;
+
+}
+
+.label-on {
+  fill: #000000;
+  opacity: 0;
+  font-family: 'roboto', sans-serif;
+}
+
+.cable {
+  fill: none;
+  stroke: url(#plastic);
+  stroke-width: 34;
+  stroke-linecap: round;
+}
+
+.right-plug {
+  transform-origin: 610px 190px;
+  transition: transform 650ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.right-cable {
+  transition: d 650ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.pins {
+  transition: opacity 180ms ease 260ms;
+}
+
+.plug-card {
+  width: 100%;
+  border: 0;
+  padding: 16px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.plug-card.is-on .bg {
+  fill: url(#bgOn);
+}
+
+.plug-card.is-on .label-off {
+  opacity: 0;
+}
+
+.plug-card.is-on .label-on {
+  opacity: 1;
+}
+
+.plug-card.is-on .right-plug {
+  transform: translateX(-158px);
+}
+
+.plug-card.is-on .pins {
+  opacity: 0;
+}
+
+.plug-card svg {
+  width: 100%;
+  max-width: 380px;
+  display: block;
+  transition: max-width 250ms ease;
+}
+
+.plug-card.collapsed svg {
+  max-width: 100px;
+}
