@@ -153,6 +153,9 @@ mat-sidenav-content {
   background: #1c1f29;
   color: #fbfbfb;
   transition: margin-left 0.25s ease !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .toggle-btn {
