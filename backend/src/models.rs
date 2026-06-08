@@ -129,6 +129,15 @@ pub struct InstrumentSearchResponse {
     pub items: Vec<InstrumentSearchItem>,
 }
 
+/// Item du catalog d'instruments (mapping ID -> symbole court)
+/// Endpoint : GET /api/instruments/catalog
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstrumentCatalogItem {
+    pub instrument_id: i64,
+    pub symbol: String,
+}
+
 /// Prix en temps réel d'un instrument (bid/ask)
 /// Endpoint : GET /market-data/instruments/rates?instrumentIds=100000
 #[derive(Debug, Serialize, Deserialize)]
