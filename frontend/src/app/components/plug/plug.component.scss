@@ -4,7 +4,7 @@
 }
 
 .plug-card {
-  width: min(900px, 94vw);
+  width: min(800px, 94vw);
   border: 0;
   padding: 0;
   background: transparent;
@@ -94,11 +94,13 @@ svg {
 
 .plug-card svg {
   width: 100%;
-  max-width: 380px;
+  max-width: 220px;
+  max-height: 280px;
   display: block;
   transition: max-width 250ms ease;
 }
 
 .plug-card.collapsed svg {
-  max-width: 100px;
+  min-width: 110px;
+  min-height: 110px;
 }
