@@ -25,7 +25,6 @@ a {
   transition: background 0.15s, color 0.15s;
 
   mat-icon { min-width: 24px; }
-  color: #9fbba4;
 }
 
 a.active {
@@ -87,9 +86,10 @@ a:hover:not(.active) {
 
 .nav-label {
   margin-left: 12px;
-  font-size: 30px;
-  font-family: 'Open Sans';
+  font-size: 32px;
+  font-family: 'Open Sans' , sans-serif;
   color: #ffffff;
+  padding: 10px;
 }
 
 mat-icon {
@@ -110,7 +110,7 @@ mat-sidenav {
   mat-nav-list {
     display: flex;
     flex-direction: column;
-    gap: 0px;
+    gap: 0;
   }
 
   mat-nav-list mat-icon {
