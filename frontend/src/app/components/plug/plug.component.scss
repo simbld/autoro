@@ -95,12 +95,10 @@ svg {
 .plug-card svg {
   width: 100%;
   max-width: 220px;
-  max-height: 280px;
   display: block;
   transition: max-width 250ms ease;
 }
 
 .plug-card.collapsed svg {
   min-width: 110px;
-  min-height: 110px;
 }
