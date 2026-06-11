@@ -12,7 +12,8 @@ use serde::Deserialize;
 use crate::etoro::EtoroClient;
 use crate::models::{
     ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse, Health,
-    InstrumentRatesResponse, InstrumentSearchResponse, NewsResponse, TradeHistoryItem,
+    InstrumentCatalogItem, InstrumentRatesResponse, InstrumentSearchResponse, NewsResponse,
+    TradeHistoryItem,
 };
 use crate::news;
 
@@ -29,6 +30,7 @@ pub fn app_router(etoro_client: EtoroClient, news_api_key: Option<String>) -> Ro
         .route("/health", get(health))
         .route("/api/orders", post(create_order))
         .route("/api/instruments/search", get(search_instrument))
+        .route("/api/instruments/catalog", get(get_catalog))
         .route("/api/instruments/rates", get(get_rates))
         .route("/api/portfolio", get(get_portfolio))
         .route("/api/positions/{id}/close", post(close_position))
@@ -72,6 +74,14 @@ async fn search_instrument(
             Err(StatusCode::BAD_GATEWAY)
         }
     }
+}
+
+async fn get_catalog() -> Json<Vec<InstrumentCatalogItem>> {
+    Json(vec![
+        InstrumentCatalogItem { instrument_id: 100000, symbol: "BTC".into() },
+        InstrumentCatalogItem { instrument_id: 100001, symbol: "ETH".into() },
+        InstrumentCatalogItem { instrument_id: 100063, symbol: "SOL".into() },
+    ])
 }
 
 #[derive(Deserialize)]
