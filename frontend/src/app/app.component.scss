@@ -18,24 +18,44 @@
 a {
   display: flex;
   align-items: center;
-  color: #292e3d;
-  width: calc(100% - 16px);
-  margin: 4px 8px;
-  border-radius: 8px;
+  position: relative;
+  width: 100%;
+  min-height: 60px;
+  padding: 0 16px;
   transition: background 0.15s, color 0.15s;
 
   mat-icon { min-width: 24px; }
 }
 
 a.active {
-  background: #292e3d;
-  color: #2eb9d0;
-  border-radius: 8px;
+  background: transparent;
 }
 
 a:hover:not(.active) {
-  background: #1e2a40;
+  background: #292E3D;
   color: #c8d6e8;
+}
+
+a.active .nav-label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 60px;
+  vertical-align: middle;
+  background: #30CF4F;
+  border-radius: 25px;
+  box-shadow:
+          0 0 6px  #30CF4F,
+          0 0 14px #30CF4F,
+          0 0 28px #30CF4F,
+          0 0 50px rgba(48, 207, 79, 0.6);
+}
+
+a.active:hover::before {
+  box-shadow: none;
 }
 
 .backend-label {
@@ -185,4 +205,14 @@ mat-sidenav-content {
 .toggle-btn mat-icon.rotated {
   transform: rotate(180deg);
   transition: transform 0.25s ease;
+}
+
+.mat-mdc-nav-list .mat-mdc-list-item {
+  border-radius: 0 !important;
+  background: transparent;
+}
+
+.mat-mdc-list-item .mat-mdc-focus-indicator,
+.mat-mdc-list-item .mat-ripple {
+  display: none !important;
 }
