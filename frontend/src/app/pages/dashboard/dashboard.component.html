@@ -17,7 +17,7 @@
             <table mat-table [dataSource]="portfolio.positions">
         <ng-container matColumnDef="instrument">
           <th mat-header-cell *matHeaderCellDef>Instrument</th>
-          <td mat-cell *matCellDef="let p">{{ instrumentName[p.instrumentID] }}</td>
+          <td mat-cell *matCellDef="let p">{{ p.instrumentID }}</td>
         </ng-container>
 
         <ng-container matColumnDef="direction">
