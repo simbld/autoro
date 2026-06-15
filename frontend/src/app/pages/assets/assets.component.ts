@@ -9,10 +9,11 @@ import {
 import {CommonModule} from "@angular/common";
 import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
+import {InstrumentNamePipe} from "../../pipes/instrument-name.pipe";
 
 @Component({
   selector: 'app-assets',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatCardModule],
+  imports: [CommonModule, MatTableModule, MatButtonModule, MatCardModule, InstrumentNamePipe],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss'
 })
