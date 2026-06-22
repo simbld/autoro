@@ -126,6 +126,8 @@ mat-sidenav {
   border-right: 1px solid #1e2a40;
   transition: width 0.25s ease;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
   mat-nav-list {
     display: flex;
@@ -176,6 +178,29 @@ mat-sidenav-content {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+mat-sidenav .mat-drawer-inner-container,
+mat-sidenav .mat-mdc-drawer-inner-container {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
+}
+
+mat-sidenav mat-nav-list {
+  margin-bottom: auto;
+}
+
+.switch-mode-button {
+  background: transparent;
+  border: none;
+  color: #6BB8FF;
+  font-size: 21px;
+  font-weight: 400;
+  cursor: pointer;
+  padding-left: 8px;
+  margin-top: auto;
 }
 
 .toggle-btn {
