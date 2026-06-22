@@ -39,13 +39,17 @@
                 <mat-icon>account_circle</mat-icon>
                 <span class="nav-label">Wallet</span>
             </a>
+                <span class="nav-label">Basculer vers le virtuel</span>
+                <button class="switch-mode-button">
+                    Basculer vers le virtuel >
+                </button>
         </mat-nav-list>
     </mat-sidenav>
 
     <mat-sidenav-content>
         <router-outlet />
+<app-bottom-bar />
     </mat-sidenav-content>
 
 </mat-sidenav-container>
 
-<app-bottom-bar />
