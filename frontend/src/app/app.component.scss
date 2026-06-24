@@ -180,44 +180,22 @@ mat-sidenav-content {
   min-height: 100vh;
 }
 
-mat-sidenav .mat-drawer-inner-container,
-mat-sidenav .mat-mdc-drawer-inner-container {
-  display: flex !important;
+mat-sidenav ::ng-deep .mat-drawer-inner-container {
+  display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 100%;
-}
-
-mat-sidenav mat-nav-list {
-  margin-bottom: auto;
-}
-
-.switch-mode-button {
-  background: transparent;
-  border: none;
-  color: #6BB8FF;
-  font-size: 21px;
-  font-weight: 400;
-  cursor: pointer;
-  padding-left: 8px;
-  margin-top: auto;
+  height: 100%;
 }
 
 .toggle-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #919399;
   display: flex;
   align-items: center;
   padding: 4px;
   transition: color 0.5s ease-in-out, background 0.5s ease-in-out;
-
-  &:hover {
-    color: #ffffff;
-    background: none;
-  }
 }
+
 
 .toggle-btn mat-icon {
   --icon-size: 36px;
@@ -225,6 +203,12 @@ mat-sidenav mat-nav-list {
   width: var(--icon-size);
   height: var(--icon-size);
   line-height: var(--icon-size);
+  color: #c0d1e3 !important;
+
+  &:hover {
+    color: #ffffff !important;
+    background: none;
+  }
 }
 
 .toggle-btn mat-icon.rotated {
@@ -241,3 +225,28 @@ mat-sidenav mat-nav-list {
 .mat-mdc-list-item .mat-ripple {
   display: none !important;
 }
+
+:host ::ng-deep mat-nav-list.mat-mdc-nav-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .mat-drawer-inner-container {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+}
+
+:host ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari */
+}
+
+* {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari */
+}
+
