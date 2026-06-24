@@ -4,16 +4,28 @@
 }
 
 .plug-card {
-  width: min(800px, 94vw);
   border: 0;
-  padding: 0;
+  margin: 10px;
+  padding-bottom: 50px;
   background: transparent;
   cursor: pointer;
+  width: 85%;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
-svg {
-  width: 100%;
-  display: block;
+.plug-card svg {
+  overflow: hidden;
+}
+
+.plug-card:hover {
+  overflow: visible;
+}
+
+.plug-card:hover svg {
+  overflow: visible;
+  filter: brightness(1.2) drop-shadow(0 0 8px #ff8a00);
 }
 
 .bg {
@@ -61,17 +73,6 @@ svg {
   transition: opacity 180ms ease 260ms;
 }
 
-.plug-card {
-  width: 100%;
-  border: 0;
-  padding: 16px;
-  background: transparent;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  box-sizing: border-box;
-}
-
 .plug-card.is-on .bg {
   fill: url(#bgOn);
 }
@@ -96,9 +97,5 @@ svg {
   width: 100%;
   max-width: 220px;
   display: block;
-  transition: max-width 250ms ease;
-}
-
-.plug-card.collapsed svg {
-  min-width: 110px;
+  transition: max-width 250ms ease, filter 300ms ease;
 }
