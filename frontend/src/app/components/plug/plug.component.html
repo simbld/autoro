@@ -45,28 +45,28 @@
 
         <rect class="bg" width="550" height="310" rx="32" />
 
-        <text class="label label-off" x="42" y="110">OFF</text>
-        <text class="label label-on" x="42" y="110">ON</text>
+        <text class="label label-off" x="19" y="280" textLength="290" lengthAdjust="spacingAndGlyphs">OFF</text>
+        <text class="label label-on" x="19" y="280" textLength="290" lengthAdjust="spacingAndGlyphs">ON</text>
 
         <g class="clip-group" clip-path="url(#clipBox)">
             <g filter="url(#shadow)">
                 <!-- left cable -->
-                <path class="cable" d="M-100 210 C110 190, 180 198, 255 198" />
+                <path class="cable" d="M-100 210 C110 190, 180 170, 255 198" />
 
                 <!-- female plug -->
                 <g class="left-plug" filter="url(#plugShadow)">
                     <rect x="250" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
                     <rect x="226" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
                     <rect x="435" y="115" width="42" height="150" rx="20" fill="url(#plastic)" />
-                    <ellipse cx="456" cy="150" rx="13" ry="21" fill="#8f8f8f" />
-                    <ellipse cx="456" cy="225" rx="13" ry="21" fill="#8f8f8f" />
+                    <ellipse cx="472" cy="15" rx="4" ry=18 fill="#8f8f8f" />
+                    <ellipse cx="472" cy="220" rx="4" ry=18 fill="#8f8f8f" />
                 </g>
 
                 <!-- right cable -->
-                <path class="cable right-cable" d="M645 198 C720 198, 800 205, 900 215" />
+                <path class="cable right-cable" d="M660 198 C720 198, 800 205, 900 215" transform="translate(30, -10)"/>
 
                 <!-- male plug -->
-                <g class="right-plug" filter="url(#plugShadow)">
+                <g class="right-plug" transform="translate(50, 0)">
                     <rect x="610" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
                     <rect x="800" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
                     <rect x="592" y="115" width="42" height="150" rx="20" fill="url(#plastic)" />
@@ -74,7 +74,7 @@
                     <g class="pins">
                         <rect x="525" y="145" width="85" height="24" rx="12" fill="url(#metal)" />
                         <rect x="525" y="220" width="85" height="24" rx="12" fill="url(#metal)" />
-                    </g>
+                    </g>c
                 </g>
             </g>
         </g>
