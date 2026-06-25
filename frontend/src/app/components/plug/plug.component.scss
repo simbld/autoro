@@ -19,13 +19,13 @@
   overflow: hidden;
 }
 
-.plug-card:hover {
-  overflow: visible;
+.plug-card:hover .clip-group {
+  clip-path: none;
 }
 
 .plug-card:hover svg {
   overflow: visible;
-  filter: brightness(1.2) drop-shadow(0 0 8px #ff8a00);
+  filter: brightness(1.2) drop-shadow(0 0 8px #f4a150);
 }
 
 .bg {
@@ -34,23 +34,20 @@
 }
 
 .label {
-  font-size: 100px;
-  font-weight: 900;
-  letter-spacing: 1px;
+  font-family: "I tell you all my secrets" , sans-serif;
+  font-size: 20rem;
   transition: opacity 250ms ease;
+  transform: scaleX(1.65);
 }
 
 .label-off {
   fill: #555;
   opacity: 1;
-  font-family: 'roboto', sans-serif;
-
 }
 
 .label-on {
   fill: #000000;
   opacity: 0;
-  font-family: 'roboto', sans-serif;
 }
 
 .cable {
