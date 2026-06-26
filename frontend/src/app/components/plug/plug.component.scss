@@ -30,24 +30,26 @@
 
 .bg {
   fill: url(#bgOff);
-  transition: fill 450ms ease;
+  transition: fill 450ms ease 500ms;
 }
 
 .label {
   font-family: "I tell you all my secrets" , sans-serif;
-  font-size: 20rem;
-  transition: opacity 250ms ease;
-  transform: scaleX(1.65);
+  font-size: 24rem;
+  transition: opacity 450ms ease 500ms;
+  transform-origin: center;
 }
 
 .label-off {
   fill: #555;
   opacity: 1;
+  transform: scaleX(1.8);
 }
 
 .label-on {
   fill: #000000;
   opacity: 0;
+  transform: scaleX(1.6);
 }
 
 .cable {
@@ -67,11 +69,12 @@
 }
 
 .pins {
-  transition: opacity 180ms ease 260ms;
+  transition: opacity 300ms ease;
 }
 
 .plug-card.is-on .bg {
   fill: url(#bgOn);
+  transition: fill 450ms ease 500ms;
 }
 
 .plug-card.is-on .label-off {
@@ -83,11 +86,7 @@
 }
 
 .plug-card.is-on .right-plug {
-  transform: translateX(-158px);
-}
-
-.plug-card.is-on .pins {
-  opacity: 0;
+  transform: translateX(-115px);
 }
 
 .plug-card svg {
