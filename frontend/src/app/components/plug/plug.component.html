@@ -6,7 +6,7 @@
         [class.collapsed]="collapsed"
         [attr.aria-pressed]="isOn"
 >
-    <svg viewBox="0 0 550 310" role="img" aria-label="Animated plug connector">
+    <svg viewBox="-250 0 1100 310" role="img" aria-label="Animated plug connector">
         <defs>
             <linearGradient id="bgOff" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#d7d7d7" />
@@ -41,15 +41,15 @@
         </defs>
 
         <rect class="bg bg-off" width="550" height="310" rx="32" fill="url(#bgOff)" />
-        <rect class="bg bg-on" width="550" height="310" rx="32" fill="url(#bgOn)" />
+        <rect class="bg bg-on" width="520" height="310" rx="32" fill="url(#bgOn)" />
 
-        <text class="label label-off" x="125" y="295" textLength="300" lengthAdjust="spacingAndGlyphs">OFF</text>
-        <text class="label label-on" x="110" y="295" textLength="320" lengthAdjust="spacingAndGlyphs">ON</text>
+        <text class="label label-off" x="240" y="295" textLength="300" lengthAdjust="spacingAndGlyphs">OFF</text>
+        <text class="label label-on" x="218" y="295" textLength="290" lengthAdjust="spacingAndGlyphs">ON</text>
 
         <g class="clip-group">
             <g filter="url(#shadow)">
                 <!-- left cable -->
-                <path class="cable" d="M -239 207 C -156 213 71 182 286 190" />
+                <path class="cable" d="M -350 209 C -156 213 71 182 286 190" />
 
                 <!-- right cable -->
                 <path class="cable right-cable" d="M 696 199 C 1259 233 902 5 1238 -9" transform="translate(30, -10)"/>
