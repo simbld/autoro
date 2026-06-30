@@ -4,7 +4,7 @@
 }
 
 .cable {
-  opacity: 1;
+  opacity: 0;
   transition: opacity 300ms ease;
   fill: none;
   stroke: url(#plastic);
@@ -13,7 +13,7 @@
 }
 
 .right-cable {
-  opacity: 1;
+  opacity: 0;
   transition: d 650ms cubic-bezier(.2, .8, .2, 1);
 }
 
@@ -54,10 +54,6 @@
   overflow: visible;
 }
 
-.plug-card:hover .cable {
-  opacity: 1;
-}
-
 .plug-card:hover .clip-group {
   filter: brightness(1) drop-shadow(0 0 20px rgb(244 161 80 / 0.48));
 }
@@ -92,11 +88,17 @@
 }
 
 .right-plug {
+  opacity: 0;
   transform-origin: 610px 190px;
   transition: transform 650ms cubic-bezier(.2, .8, .2, 1);
 }
 
+.left-plug {
+  opacity: 0;
+}
+
 .pins {
+  opacity: 0;
   transition: opacity 300ms ease;
 }
 
@@ -138,34 +140,34 @@
   10% {
     opacity: 0.1;
   }
-  15% {
+ 35% {
     opacity: 0;
   }
-  20% {
+  42% {
     opacity: 0.1;
   }
-  40% {
+  44% {
     opacity: 0;
   }
-  45% {
+  46% {
     opacity: 0.1;
   }
-  55% {
+  47% {
     opacity: 0;
   }
-  60% {
+  48% {
     opacity: 0.1;
   }
   70% {
     opacity: 0;
   }
-  75% {
+  84% {
     opacity: 0.5;
   }
-  80% {
+  86% {
     opacity: 0.1;
   }
-  85% {
+  88% {
     opacity: 0.7;
   }
   90% {
@@ -179,32 +181,24 @@
   }
 }
 
-.plug-card.is-on .cable,
-.plug-card.is-on .pins {
-  opacity: 0;
-  transition: opacity 100ms ease 3000ms;
-}
-
-.plug-card.is-on:hover .cable,
-.plug-card.is-on:hover .pins {
-  opacity: 1;
-  transition: opacity 200ms ease;
-}
-
-.right-plug,
-.left-plug {
-  opacity: 1;
-  transition: transform 650ms cubic-bezier(.2, .8, .2, 1), opacity 300ms ease;
-}
-
-.plug-card.is-on .right-plug,
-.plug-card.is-on .left-plug {
-  opacity: 0;
-  transition: transform 650ms cubic-bezier(.2, .8, .2, 1), opacity 500ms ease 3000ms;
-}
-
 .plug-card.is-on:hover .right-plug,
 .plug-card.is-on:hover .left-plug {
   opacity: 1;
-  transition: opacity 200ms ease;
+  transition: opacity 500ms ease;
+}
+
+.plug-card:hover .cable,
+.plug-card:hover .pins,
+.plug-card:hover .right-plug,
+.plug-card:hover .left-plug {
+  opacity: 1;
+  transition: opacity 200ms ease 200ms;
+}
+
+.right-cable {
+  d: path("M 793 205 C 1043 204 856 148 840 101 S 852 29 955 52");   /* la forme initiale */
+}
+
+.plug-card.is-on .right-cable {
+  d: path("M 704 197 C 923 200 856 148 848 113 S 852 29 955 52");   /* la forme branchée */
 }
