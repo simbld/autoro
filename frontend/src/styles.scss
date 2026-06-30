@@ -7,13 +7,24 @@ body {
 :root {
   color-scheme: dark;
   font-family:
-          Inter,
           system-ui,
           -apple-system,
           BlinkMacSystemFont,
+          Inter,
+          Roboto,
+          Ubuntu,
+          Oxygen,
+          Cantarell,
+          Arial, sans-serif,
+          sans-serif,
           "Segoe UI",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
           "Open Sans",
-          sans-serif;
+          "Fira Sans",
+          "Droid Sans",
+          "Helvetica Neue",
+          "Apple Color Emoji";
   background: #13151c;
   color: #fbfbfb;
   --divider: #232733;
