@@ -12,7 +12,6 @@
                 <mat-icon  [class.rotated]="collapsed">menu_open</mat-icon>
             </button>
         </div>
-        <app-plug [collapsed]="collapsed" />
         <mat-nav-list>
             <a mat-list-item routerLink="/home" routerLinkActive="active"
                [matTooltip]="collapsed ? 'Home' : ''" matTooltipPosition="right">
@@ -40,12 +39,13 @@
                 <span class="nav-label">Wallet</span>
             </a>
         </mat-nav-list>
+        <app-plug [collapsed]="collapsed" />
     </mat-sidenav>
 
     <mat-sidenav-content>
         <router-outlet />
+<app-bottom-bar />
     </mat-sidenav-content>
 
 </mat-sidenav-container>
 
-<app-bottom-bar />

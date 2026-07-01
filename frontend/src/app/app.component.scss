@@ -51,7 +51,7 @@ a.active .nav-label::before {
           0 0 6px  #30CF4F,
           0 0 14px #30CF4F,
           0 0 28px #30CF4F,
-          0 0 50px rgba(48, 207, 79, 0.6);
+          0 0 50px rgb(48 207 79 / 0.25);
 }
 
 a.active:hover::before {
@@ -126,6 +126,8 @@ mat-sidenav {
   border-right: 1px solid #1e2a40;
   transition: width 0.25s ease;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
   mat-nav-list {
     display: flex;
@@ -178,21 +180,22 @@ mat-sidenav-content {
   min-height: 100vh;
 }
 
+mat-sidenav ::ng-deep .mat-drawer-inner-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .toggle-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #919399;
   display: flex;
   align-items: center;
   padding: 4px;
   transition: color 0.5s ease-in-out, background 0.5s ease-in-out;
-
-  &:hover {
-    color: #ffffff;
-    background: none;
-  }
 }
+
 
 .toggle-btn mat-icon {
   --icon-size: 36px;
@@ -200,6 +203,12 @@ mat-sidenav-content {
   width: var(--icon-size);
   height: var(--icon-size);
   line-height: var(--icon-size);
+  color: #c0d1e3 !important;
+
+  &:hover {
+    color: #ffffff !important;
+    background: none;
+  }
 }
 
 .toggle-btn mat-icon.rotated {
@@ -216,3 +225,28 @@ mat-sidenav-content {
 .mat-mdc-list-item .mat-ripple {
   display: none !important;
 }
+
+:host ::ng-deep mat-nav-list.mat-mdc-nav-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .mat-drawer-inner-container {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+}
+
+:host ::ng-deep .mat-drawer-inner-container::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari */
+}
+
+* {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari */
+}
+

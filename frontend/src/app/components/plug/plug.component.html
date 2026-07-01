@@ -6,7 +6,7 @@
         [class.collapsed]="collapsed"
         [attr.aria-pressed]="isOn"
 >
-    <svg viewBox="0 0 550 400" role="img" aria-label="Animated plug connector">
+    <svg viewBox="-250 0 1100 310" role="img" aria-label="Animated plug connector">
         <defs>
             <linearGradient id="bgOff" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#d7d7d7" />
@@ -20,7 +20,8 @@
 
             <linearGradient id="plastic" x1="0" y1="0" x2="2" y2="1">
                 <stop offset="0%" stop-color="#0e0f0f" />
-                <stop offset="60%" stop-color="#eeeeee" />
+                <stop offset="30%" stop-color="#72696969" />
+                <stop offset="70%" stop-color="#eeeeee" />
                 <stop offset="100%" stop-color="#cfcfcf" />
             </linearGradient>
 
@@ -39,42 +40,43 @@
             </filter>
         </defs>
 
-        <rect class="bg" width="550" height="310" rx="32" />
+        <rect class="bg bg-off" width="550" height="310" rx="32" fill="url(#bgOff)" />
+        <rect class="bg bg-on" width="520" height="310" rx="32" fill="url(#bgOn)" />
 
-        <text class="label label-off" x="42" y="110">OFF</text>
-        <text class="label label-on" x="42" y="110">ON</text>
+        <text class="label label-off" x="240" y="295" textLength="300" lengthAdjust="spacingAndGlyphs">OFF</text>
+        <text class="label label-on" x="218" y="295" textLength="290" lengthAdjust="spacingAndGlyphs">ON</text>
 
-        <g class="left-plug" filter="url(#plugShadow)">
-        <g class="right-plug" filter="url(#plugShadow)">
-        <g filter="url(#shadow)">
-            <!-- left cable -->
-            <path class="cable" d="M0 210 C110 190, 180 198, 255 198" />
+        <g class="clip-group">
+            <g filter="url(#shadow)">
+                <!-- left cable -->
+                <path class="cable" d="M -350 209 C -156 213 71 182 286 190" />
 
-            <!-- female plug -->
-            <g class="left-plug">
-                <rect x="250" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
-                <rect x="226" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
-                <rect x="435" y="115" width="42" height="150" rx="20" fill="url(#plastic)" />
-                <ellipse cx="456" cy="150" rx="13" ry="21" fill="#8f8f8f" />
-                <ellipse cx="456" cy="225" rx="13" ry="21" fill="#8f8f8f" />
-            </g>
+                <!-- right cable -->
+                <path class="cable right-cable" d="M 696 199 C 1259 233 902 5 1238 -9" transform="translate(30, -10)"/>
 
-            <!-- right cable -->
-            <path class="cable right-cable" d="M645 198 C720 198, 800 205, 900 215" />
+                <!-- male plug -->
+                <g class="right-plug" transform="translate(50, 0)">
+                    <rect x="610" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
+                    <rect x="800" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
+                    <path d="M592 115 H614 a20 20 0 0 1 20 20 V245 a20 20 0 0 1 -20 20 H592 Z" fill="url(#plastic)" />
+                    <ellipse cx="592" cy="156" rx="2" ry="16" fill="#8f8f8f" />
+                    <ellipse cx="592" cy="231" rx="2" ry="16" fill="#8f8f8f" />
 
-            <!-- male plug -->
-            <g class="right-plug">
-                <rect x="610" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
-                <rect x="800" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
-                <rect x="592" y="115" width="42" height="150" rx="20" fill="url(#plastic)" />
+                    <g class="pins" transform="translate(-18, 0)">
+                        <path d="M610 145 H537 a12 12 0 0 0 -12 12 a12 12 0 0 0 12 12 H610 Z" fill="url(#metal)" />
+                        <path d="M610 220 H537 a12 12 0 0 0 -12 12 a12 12 0 0 0 12 12 H610 Z" fill="url(#metal)" />
+                    </g>
+                </g>
 
-                <g class="pins">
-                    <rect x="525" y="145" width="85" height="24" rx="12" fill="url(#metal)" />
-                    <rect x="525" y="220" width="85" height="24" rx="12" fill="url(#metal)" />
+                <!-- female plug -->
+                <g class="left-plug" filter="url(#plugShadow)">
+                    <rect x="250" y="130" width="210" height="120" rx="26" fill="url(#plastic)" />
+                    <rect x="226" y="158" width="42" height="64" rx="14" fill="url(#plastic)" />
+                    <path d="M477 115 H455 a20 20 0 0 0 -20 20 V245 a20 20 0 0 0 20 20 H477 Z" fill="url(#plastic)" />
+                    <ellipse cx="477" cy="156" rx="1.5" ry=16 fill="#8f8f8f" />
+                    <ellipse cx="477" cy="231" rx="1.5" ry=16 fill="#8f8f8f" />
                 </g>
             </g>
-        </g>
-        </g>
         </g>
     </svg>
 </button>

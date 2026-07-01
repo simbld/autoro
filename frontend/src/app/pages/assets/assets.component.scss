@@ -1,0 +1,20 @@
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover .mat-mdc-cell {
+    background-color: rgb(35 39 51 / 0.76) !important;
+  }
+}
+
+.mat-mdc-table {
+  --mat-table-row-item-hover-state-layer-color: transparent;
+}
+
+.mat-mdc-row td.mat-mdc-cell:first-child{
+  font-weight: bold;
+  font-size: 22px !important;
+  letter-spacing: -1.5px;
+  line-height: 0.5 !important;
+
+}

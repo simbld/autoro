@@ -15,7 +15,7 @@ pub struct Health {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct CreateOrderRequest {
-    /// ID numérique de l'instrument (ex: 100000 pour BTC). Résoudre via /market-data/search
+    /// ID numérique de l'instrument (ex: 100 000 pour BTC). Résoudre via /market-data/search
     pub instrument_id: i64,
     /// true = achat (long), false = vente (short)
     pub is_buy: bool,
@@ -116,8 +116,8 @@ pub struct PendingOrder {
 #[serde(rename_all = "camelCase")]
 pub struct InstrumentSearchItem {
     pub instrument_id: i64,
-    pub internal_symbol_full: String,
     pub instrument_display_name: Option<String>,
+    pub internal_symbol_full: String,
 	pub daily_price_change: Option<f64>,
 	pub abs_daily_price_change: Option<f64>,
 }
@@ -191,4 +191,32 @@ pub struct TradeHistoryItem {
     pub net_profit: f64,
     pub open_timestamp: chrono::DateTime<chrono::Utc>,
     pub close_timestamp: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstrumentImage {
+	#[serde(rename = "instrumentID")]
+	pub instrument_id: i64,
+	pub width: f64,
+	pub height: f64,
+	pub uri: String,
+	pub background_color: Option<String>,
+	pub text_color: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstrumentDisplayData {
+	#[serde(rename = "instrumentID")]
+	pub instrument_id: i64,
+	pub instrument_display_name: Option<String>,
+	pub symbol_full: String,
+	pub images: Vec<InstrumentImage>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstrumentDisplayResponse {
+	pub instrument_display_datas: Vec<InstrumentDisplayData>
 }

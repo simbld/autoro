@@ -7,13 +7,24 @@ body {
 :root {
   color-scheme: dark;
   font-family:
-          Inter,
           system-ui,
           -apple-system,
           BlinkMacSystemFont,
+          Inter,
+          Roboto,
+          Ubuntu,
+          Oxygen,
+          Cantarell,
+          Arial, sans-serif,
+          sans-serif,
           "Segoe UI",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
           "Open Sans",
-          sans-serif;
+          "Fira Sans",
+          "Droid Sans",
+          "Helvetica Neue",
+          "Apple Color Emoji";
   background: #13151c;
   color: #fbfbfb;
   --divider: #232733;
@@ -143,7 +154,7 @@ table {
 .mat-mdc-header-row th.mat-mdc-header-cell {
   padding-right: 16px !important;
   text-align: center !important;
-  border-bottom: 4px solid #232733 !important;
+  border-bottom: 2px solid rgb(59 65 85 / 0.74) !important;
   color: #ffffff !important;
   background: #1c1f29 !important;
   font-size: 21px !important;
@@ -179,7 +190,7 @@ table {
 }
 
 .mat-mdc-card-content:last-child {
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 mat-card {
@@ -188,7 +199,7 @@ mat-card {
   --mdc-elevated-card-container-color: transparent;
   --mat-table-background-color: transparent;
   --mat-card-elevated-container-padding: 0;
-  --mat-table-row-item-container-height: 100px;
+  --mat-table-row-item-container-height: 95px;
   --mat-table-header-container-height: 150px;
 }
 

@@ -5,10 +5,11 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatCardModule} from "@angular/material/card";
 import {Portfolio, TradingService} from "../../services/trading.service";
 import {interval, Subscription, switchMap} from "rxjs";
+import {InstrumentNamePipe} from "../../pipes/instrument-name.pipe";
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatCardModule],
+    imports: [CommonModule, MatTableModule, MatButtonModule, MatCardModule, InstrumentNamePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
