@@ -14,7 +14,7 @@
 
 .right-cable {
   opacity: 0;
-  transition: d 650ms cubic-bezier(.2, .8, .2, 1);
+  transition: d 1000ms cubic-bezier(0,1.06,.98,0);
 }
 
 .plug-card {
@@ -90,11 +90,12 @@
 .right-plug {
   opacity: 0;
   transform-origin: 610px 190px;
-  transition: transform 650ms cubic-bezier(.2, .8, .2, 1);
+  transition: opacity 300ms ease, transform 1000ms cubic-bezier(0,1.06,.98,0);
 }
 
 .left-plug {
   opacity: 0;
+  transition: opacity 300ms ease;
 }
 
 .pins {
@@ -104,19 +105,21 @@
 
 .plug-card.is-on .label-off {
   opacity: 0;
+  transition: opacity 300ms ease;
 }
 
 .plug-card.is-on .bg-off {
   opacity: 0;
+  transition: opacity 300ms ease;
 }
 
 .plug-card.is-on .label-on {
   filter: none;
-  animation: halogen-startup 3000ms ease forwards;
+  animation: halogen-startup 800ms ease forwards;
 }
 
 .plug-card.is-on .bg-on  {
-  animation: halogen-startup 3000ms ease forwards;
+  animation: halogen-startup 500ms ease forwards;
   filter: brightness(2) drop-shadow(0 0 300px #f7dba1);
 }
 
@@ -181,18 +184,15 @@
   }
 }
 
-.plug-card.is-on:hover .right-plug,
-.plug-card.is-on:hover .left-plug {
-  opacity: 1;
-  transition: opacity 500ms ease;
-}
-
 .plug-card:hover .cable,
 .plug-card:hover .pins,
 .plug-card:hover .right-plug,
 .plug-card:hover .left-plug {
   opacity: 1;
-  transition: opacity 200ms ease 200ms;
+  transition:
+          opacity 200ms ease 200ms,
+          d 1000ms cubic-bezier(0, 1.06, .98, 0),
+          transform 1000ms cubic-bezier(0, 1.06, .98, 0);
 }
 
 .right-cable {
