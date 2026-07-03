@@ -10,8 +10,14 @@ export class PlugComponent {
     isOn = false;
     @Input()
     collapsed = false;
+    private halogen:  = new Audio('/sounds/');
 
     toggle() {
         this.isOn = !this.isOn;
+        
+        if (this.isOn) {
+            this.halogen.currentTime = 0;
+            this.halogen.play();
+        }
     }
 }
