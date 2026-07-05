@@ -14,7 +14,7 @@
 
 .right-cable {
   opacity: 0;
-  transition: d 1000ms cubic-bezier(0,1.06,.98,0);
+  transition: d 1000ms linear;
 }
 
 .plug-card {
@@ -47,7 +47,7 @@
 }
 
 .plug-card:hover {
-  filter: brightness(0.8) drop-shadow(0 0 20px rgb(189 80 244 / 0.2));
+  filter: brightness(0.8) drop-shadow(0 0 20px rgb(35 43 52));
 }
 
 .plug-card:hover svg {
@@ -59,7 +59,7 @@
 }
 
 .bg-off {
-  opacity: 0;
+  opacity: 1;
   filter: none;
 }
 
@@ -68,29 +68,39 @@
   filter: brightness(1.2) drop-shadow(0 0 18px #f4a150);
 }
 
+.border-overlay {
+  pointer-events: none;
+  stroke: #232b34;
+  transition: stroke 500ms ease;
+}
+
+.plug-card.is-on .border-overlay {
+  stroke: #ffffff;
+}
+
 .label {
   font-family: "I tell you all my secrets" , sans-serif;
-  font-size: 24rem;
+  font-size: 22rem;
   transform-origin: center;
 }
 
 .label-off {
-  fill: #a29a9a;
+  fill: #232b34;
   opacity: 1;
-  transform: scaleX(1.8);
+  transform: scaleY(0.85);
 }
 
 .label-on {
-  fill: #000000;
+  fill: #707072;
   opacity: 0;
-  transform: scaleX(1.6);
-  filter: brightness(1.2) drop-shadow(0 0 18px #f4a150);
+  transform: scaleY(0.85);
+  filter: brightness(1.2) drop-shadow(0 0 18px #f0ccab);
 }
 
 .right-plug {
   opacity: 0;
   transform-origin: 610px 190px;
-  transition: opacity 300ms ease, transform 1000ms cubic-bezier(0,1.06,.98,0);
+  transition: opacity 300ms ease, transform 100ms linear;
 }
 
 .left-plug {
@@ -134,6 +144,127 @@
 
 .plug-card.is-on .clip-group {
   clip-path: none;
+}
+
+.border-off {
+  stroke: #232b34;
+  opacity: 1;
+}
+
+.border-on {
+  stroke: #232b34;
+  opacity: 0;
+}
+
+.plug-card.is-on .border-off {
+  opacity: 0;
+}
+
+.plug-card.is-on .border-on {
+  opacity: 1;
+}
+
+.plug-card:hover .cable,
+.plug-card:hover .pins,
+.plug-card:hover .right-plug,
+.plug-card:hover .left-plug {
+  opacity: 1;
+  transition:
+          opacity 1000ms ease,
+          d 1000ms cubic-bezier(0, 1.06, .98, 0),
+          transform 1000ms cubic-bezier(0, 1.06, .98, 0);
+}
+
+.plug-card:not(.is-on):hover .right-plug {
+  opacity: 1;
+  transition: opacity 50ms ease, transform 50ms linear;
+}
+
+.plug-card:not(.is-on):hover .right-cable {
+  opacity: 1;
+  transition: opacity 50ms ease, d 50ms linear;
+}
+
+.right-cable {
+  d: path("M 793 205 C 1043 204 856 148 840 101 S 852 29 955 52");   /* débranchée*/
+}
+
+.plug-card.is-on .right-cable {
+  d: path("M 704 197 C 923 200 856 148 848 113 S 852 29 955 52");   /* branchée */
+}
+
+.shine {
+  filter: blur(20px);
+  pointer-events: none;
+  transform: translateX(0);
+  animation: sweep 5s infinite;
+  transition: opacity 100ms ease;
+}
+
+.plug-card:hover .shine,
+.plug-card.is-on .shine {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes sweep {
+  0%     {
+    transform: translateX(0) scaleX(5);
+    opacity: 0;
+    filter: blur(5px);
+    animation-timing-function: linear;
+  }
+  30%    {
+    transform: translateX(700px) scaleX(0.5);
+    opacity: 1;
+    filter: blur(0.5px);
+    animation-timing-function: linear;
+  }
+
+  32% {
+    transform: translateX(700px) scaleX(10);
+    opacity: 1;
+    filter: blur(10px);
+    animation-timing-function: linear;
+  }
+
+  35%    {
+    transform: translateX(100px) scaleX(15);
+    opacity: 0;
+    filter: blur(15px);
+    animation-timing-function: linear;
+  }
+
+  40% {
+    transform: translateX(600px) scaleX(0.5);
+    opacity: 0;
+    filter: blur(0.5px);
+    animation-timing-function: linear;
+  }
+  60%    { transform: translateX(500px) scaleX(3);
+    opacity: 1;
+    filter: blur(3px);
+    animation-timing-function: linear;
+  }
+  85%    {
+    transform: translateX(700px) scaleX(30);
+    opacity: 1;
+    filter: blur(30px);
+    animation-timing-function: linear;
+  }
+
+  90% {
+    transform: translateX(700px) scaleX(5);
+    opacity: 0;
+    filter: blur(5px);
+    animation-timing-function: linear;
+  }
+  100%   {
+    transform: translateX(0) scaleX(10);
+    opacity: 0;
+    filter: blur(10px);
+    animation-timing-function: linear;
+  }
 }
 
 @keyframes halogen-startup {
@@ -182,23 +313,4 @@
   100% {
     opacity: 1;
   }
-}
-
-.plug-card:hover .cable,
-.plug-card:hover .pins,
-.plug-card:hover .right-plug,
-.plug-card:hover .left-plug {
-  opacity: 1;
-  transition:
-          opacity 200ms ease 200ms,
-          d 1000ms cubic-bezier(0, 1.06, .98, 0),
-          transform 1000ms cubic-bezier(0, 1.06, .98, 0);
-}
-
-.right-cable {
-  d: path("M 793 205 C 1043 204 856 148 840 101 S 852 29 955 52");   /* la forme initiale */
-}
-
-.plug-card.is-on .right-cable {
-  d: path("M 704 197 C 923 200 856 148 848 113 S 852 29 955 52");   /* la forme branchée */
 }
