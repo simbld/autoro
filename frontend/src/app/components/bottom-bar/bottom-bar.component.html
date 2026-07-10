@@ -1,8 +1,7 @@
 <div class="bottom-bar">
     <div class="metrics">
         <div class="metric balance">
-            <span class="value"
-            [class.balance]="balance">
+            <span class="value">
                 {{ balance | currency:'USD':'symbol':'1.2-2' }}
             </span>
             <span class="label">Solde Total Disponible ⓘ</span>
@@ -11,8 +10,7 @@
           <span class="plus-icon">+</span>
             </div>
         <div class="metric invest">
-            <span class="value"
-            [class.invest]="invested">
+            <span class="value">
                {{ invested | currency: 'USD': 'symbol': '1.2-2' }}
             </span>
             <span class="label">Total Investi</span>
@@ -22,9 +20,9 @@
         </div>
         <div class="metric result">
     <span class="value"
-          [class.positive]="profit > 0"
-          [class.negative]="profit < 0"
-          [class.neutral]="profit === 0"  >
+          [class.neutral]="Math.abs(profit) < 0.005"
+          [class.positive]="profit >= 0.005"
+          [class.negative]="profit <= -0.005" >
         {{ profit | currency:'USD':'symbol':'1.2-2' }}
     </span>
             <span class="label">Bénéfice/Perte</span>
@@ -33,8 +31,7 @@
             <span class="equal-icon">=</span>
         </div>
         <div class="metric total">
-            <span class="value"
-            [class.total]="balance + invested + profit === total">
+            <span class="value">
                 {{ total | currency: 'USD': 'symbol': '1.2-2' }}
             </span>
             <span class="label">Valeur Totale</span>
