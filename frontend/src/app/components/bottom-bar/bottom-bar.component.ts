@@ -47,9 +47,11 @@ export class BottomBarComponent implements OnInit, OnDestroy {
             })
         ).subscribe({
             next: ({ portfolio, rates }) => {
-                // TODO : calcul balance / invested / profit ici
-                console.log('portfolio', portfolio);
-                console.log('rates', rates);
+                const positionsSum = portfolio.positions.reduce((sum, p) => sum + p.amount, 0);
+                const ordersForOpenSum = portfolio.ordersForOpen.reduce((sum, p) => sum + p.amount, 0);
+                const ordersSum = portfolio.orders.reduce((sum, p) => sum + p.amount, 0);
+                    this.invested = positionsSum + ordersForOpenSum + ordersSum;
+
             },
             error: err => console.error('refresh error', err)
         });
