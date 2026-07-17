@@ -1,5 +1,8 @@
 <div class="bottom-bar">
     <div class="metrics">
+        @if (hasError) {
+            <span class="error-indicator" title="Connexion à l'API perdue">⚠️</span>
+        }
         <div class="metric balance">
             <span class="value">
                 {{ balance | currency:'USD':'symbol':'1.2-2' }}
