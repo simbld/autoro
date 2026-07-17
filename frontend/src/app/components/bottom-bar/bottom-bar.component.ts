@@ -18,6 +18,7 @@ export class BottomBarComponent implements OnInit, OnDestroy {
     balance = 0;
     invested = 0;
     profit = 0;
+    hasError = false;
 
     get total(): number {
         return this.balance + this.invested + this.profit;
@@ -47,13 +48,29 @@ export class BottomBarComponent implements OnInit, OnDestroy {
             })
         ).subscribe({
             next: ({ portfolio, rates }) => {
+                this.hasError = false;
+
                 const positionsSum = portfolio.positions.reduce((sum, p) => sum + p.amount, 0);
                 const ordersForOpenSum = portfolio.ordersForOpen.reduce((sum, p) => sum + p.amount, 0);
                 const ordersSum = portfolio.orders.reduce((sum, p) => sum + p.amount, 0);
-                    this.invested = positionsSum + ordersForOpenSum + ordersSum;
 
+                    this.invested = positionsSum + ordersForOpenSum + ordersSum;
+                    this.balance = portfolio.credit - ordersForOpenSum - ordersSum;
+                    this.profit = portfolio.positions.reduce((sum, p) => {
+                        const rate = rates.find(r => r.instrumentID === p.instrumentID);
+                        if (!rate) return sum;
+                        const currentPrice = p.isBuy ? rate.bid : rate.ask;
+                        const pl = p.isBuy
+                            ? p.units * (currentPrice - p.openRate)
+                            : p.units * (p.openRate - currentPrice);
+
+                        return sum + pl;
+                    }, 0);
             },
-            error: err => console.error('refresh error', err)
+            error: err => {
+                this.hasError = true;
+                console.error('bottom-bar refresh failed:', err);
+            }
         });
     }
 
