@@ -3,7 +3,8 @@ use reqwest::Client;
 use uuid::Uuid;
 use crate::models::{
     ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse,
-    InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse, TradeHistoryItem,
+    EditPositionRequest, InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse,
+    TradeHistoryItem,
 };
 
 #[derive(Clone)]
@@ -57,6 +58,15 @@ impl EtoroClient {
             .header("x-request-id", Uuid::new_v4().to_string())
     }
 
+    fn patch(&self, path: &str) -> reqwest::RequestBuilder {
+        let url = format!("{}{}", self.base_url, path);
+        self.http
+            .patch(url)
+            .header("x-api-key", &self.api_key)
+            .header("x-user-key", &self.user_key)
+            .header("x-request-id", Uuid::new_v4().to_string())
+    }
+
     pub async fn search_instrument(&self, symbol: &str) -> Result<InstrumentSearchResponse, reqwest::Error> {
         self.get("/api/v1/market-data/search")
             .query(&[("internalSymbolFull", symbol)])
@@ -99,6 +109,25 @@ impl EtoroClient {
         let status = resp.status();
         let text = resp.text().await?;
         tracing::debug!("close_position status={} body={}", status, text);
+        let value: serde_json::Value = serde_json::from_str(&text)
+            .unwrap_or(serde_json::json!({"raw": text, "status": status.as_u16()}));
+        Ok(CreateOrderResponse(value))
+    }
+
+    /// Modifie le SL/TP d'une position ouverte (API v2, réponse 202 asynchrone).
+    /// Path demo : /api/v2/trading/demo/positions/{id} — réel : /api/v2/trading/positions/{id}
+    pub async fn edit_position(
+        &self,
+        position_id: i64,
+        payload: EditPositionRequest,
+    ) -> Result<CreateOrderResponse, reqwest::Error> {
+        let mode_segment = if self.mode == "demo" { "demo/" } else { "" };
+        let resp = self.patch(&format!("/api/v2/trading/{mode_segment}positions/{position_id}"))
+            .json(&payload)
+            .send().await?;
+        let status = resp.status();
+        let text = resp.text().await?;
+        tracing::debug!("edit_position status={} body={}", status, text);
         let value: serde_json::Value = serde_json::from_str(&text)
             .unwrap_or(serde_json::json!({"raw": text, "status": status.as_u16()}));
         Ok(CreateOrderResponse(value))
