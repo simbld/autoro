@@ -108,3 +108,11 @@
   font-size: 40px;
   line-height: 1;
 }
+
+.error-indicator {
+  position: absolute;
+  top: -20%;
+  right: 50%;
+  font-size: 5rem;
+  cursor: help;
+}
