@@ -1,11 +1,7 @@
 // /backend/src/etoro.rs
 use reqwest::Client;
 use uuid::Uuid;
-use crate::models::{
-    ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse,
-    EditPositionRequest, InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse,
-    TradeHistoryItem,
-};
+use crate::models::{ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse, EditPositionRequest, HistoryResponse, InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse, TradeHistoryItem};
 
 #[derive(Clone)]
 pub struct EtoroClient {
@@ -134,12 +130,15 @@ impl EtoroClient {
     }
 
     pub async fn get_history(&self, min_date: &str) -> Result<Vec<TradeHistoryItem>, reqwest::Error> {
-        self.get("/api/v1/trading/info/trade/history")
+		let mode_segment = if self.mode == "demo" { "demo/" } else { "" };
+		let resp =
+        self.get(&format!("/api/v1/trading/info/trade/{mode_segment}/history"))
             .query(&[("minDate", min_date)])
             .send().await?
             .error_for_status()?
-            .json::<Vec<TradeHistoryItem>>()
-            .await
+            .json::<HistoryResponse>()
+            .await?;
+		Ok(resp.items)
     }
 
     pub async fn send_order(&self, payload: CreateOrderRequest) -> Result<CreateOrderResponse, reqwest::Error> {
