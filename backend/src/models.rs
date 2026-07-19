@@ -34,7 +34,6 @@ pub struct CreateOrderRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub take_profit_rate: Option<f64>,
     /// Stop-loss suiveur dès l'ouverture (optionnel).
-    /// L'API attend `IsTslEnabled`, pas `IsTrailingStopLoss`.
     #[serde(rename = "IsTslEnabled", skip_serializing_if = "Option::is_none")]
     pub is_tsl_enabled: Option<bool>,
     /// true = pas de take-profit sur la position (laisser courir les gagnants)
@@ -108,7 +107,7 @@ pub struct Position {
     pub tsl_rate: Option<f64>,
 }
 
-/// Portfolio complet du client (réponse PnL)
+/// Portfolio complet du client (réponse `PnL`)
 /// Endpoint : GET /trading/info/{real|demo}/pnl
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -222,6 +221,13 @@ pub struct TradeHistoryItem {
     pub open_timestamp: chrono::DateTime<chrono::Utc>,
     pub close_timestamp: chrono::DateTime<chrono::Utc>,
 }
+
+/// Réponse de la route `/trade/history`
+#[derive(Debug, Deserialize)]
+pub struct HistoryResponse {
+	pub items: Vec<TradeHistoryItem>,
+}
+
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
