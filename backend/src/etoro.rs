@@ -1,7 +1,7 @@
 // /backend/src/etoro.rs
 use reqwest::Client;
 use uuid::Uuid;
-use crate::models::{ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse, EditPositionRequest, HistoryResponse, InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse, TradeHistoryItem};
+use crate::models::{CandlesResponse, ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse, EditPositionRequest, HistoryResponse, InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse, TradeHistoryItem};
 
 #[derive(Clone)]
 pub struct EtoroClient {
@@ -11,6 +11,24 @@ pub struct EtoroClient {
     pub http: Client,
     /// "demo" ou "real"
     pub mode: String,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum CandleInterval {
+	FiveMinutes,
+	FifteenMinutes,
+	ThirtyMinutes,
+}
+
+impl CandleInterval {
+	/// Seul endroit du code où les chaînes exactes de l'API existent.
+	fn as_str(self) -> &'static str {
+		match self {
+			Self::FiveMinutes => "FiveMinutes",
+			Self::FifteenMinutes => "FifteenMinutes",
+			Self::ThirtyMinutes => "ThirtyMinutes",
+		}
+	}
 }
 
 impl std::fmt::Debug for EtoroClient {
@@ -132,7 +150,7 @@ impl EtoroClient {
     pub async fn get_history(&self, min_date: &str) -> Result<Vec<TradeHistoryItem>, reqwest::Error> {
 		let mode_segment = if self.mode == "demo" { "demo/" } else { "" };
 		let resp =
-        self.get(&format!("/api/v1/trading/info/trade/{mode_segment}/history"))
+        self.get(&format!("/api/v1/trading/info/trade/{mode_segment}history"))
             .query(&[("minDate", min_date)])
             .send().await?
             .error_for_status()?
@@ -154,4 +172,22 @@ impl EtoroClient {
             .json::<CreateOrderResponse>()
             .await
     }
+
+	/// Get candles for a given instrument (API v3
+	pub async fn get_candles(
+		&self,
+		instrument_id: i64,
+		interval: CandleInterval,
+		count: u32,
+	) -> Result<CandlesResponse, reqwest::Error> {
+		self.get(&format!(
+			"/api/v1/market-data/instruments/{instrument_id}/history/candles/asc/{}/{count}",
+			interval.as_str()
+		))
+			.send().await?
+			.error_for_status()?
+			.json::<CandlesResponse>()
+			.await
+	}
 }
+
