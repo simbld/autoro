@@ -68,7 +68,6 @@ pub struct EditPositionRequest {
 }
 
 /// Réponse brute de l'API eToro pour les ordres (format variable selon l'endpoint).
-/// On utilise `serde_json::Value` pour accepter n'importe quelle structure.
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct CreateOrderResponse(pub serde_json::Value);
@@ -207,7 +206,7 @@ pub struct NewsResponse {
 /// Item d'historique de trading (position fermée)
 /// Endpoint : GET /trading/history/real
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all = "camelCase")]
 pub struct TradeHistoryItem {
     pub position_id: i64,
     pub instrument_id: i64,
@@ -228,31 +227,31 @@ pub struct HistoryResponse {
 	pub items: Vec<TradeHistoryItem>,
 }
 
-
-#[derive(Debug, Serialize, Deserialize)]
+/// Une bougie OHLCV individuelle.
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InstrumentImage {
+pub struct Candle {
 	#[serde(rename = "instrumentID")]
 	pub instrument_id: i64,
-	pub width: f64,
-	pub height: f64,
-	pub uri: String,
-	pub background_color: Option<String>,
-	pub text_color: Option<String>,
+	pub from_date: chrono::DateTime<chrono::Utc>,
+	pub open: f64,
+	pub high: f64,
+	pub low: f64,
+	pub close: f64,
+	pub volume: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+/// Groupe de bougies d'un instrument.
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InstrumentDisplayData {
-	#[serde(rename = "instrumentID")]
+pub struct InstrumentCandles {
 	pub instrument_id: i64,
-	pub instrument_display_name: Option<String>,
-	pub symbol_full: String,
-	pub images: Vec<InstrumentImage>
+	pub candles: Vec<Candle>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct InstrumentDisplayResponse {
-	pub instrument_display_datas: Vec<InstrumentDisplayData>
+/// Enveloppe complète de la réponse.
+#[derive(Debug, Deserialize)]
+pub struct CandlesResponse {
+	pub interval: String,
+	pub candles: Vec<InstrumentCandles>,
 }
