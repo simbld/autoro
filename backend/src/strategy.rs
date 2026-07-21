@@ -1,5 +1,6 @@
 // /backend/src/strategy.rs
 // Stratégie V2 : vote majoritaire RSI + EMA croisée + Bollinger Bands + MACD
+use crate::models::Candle;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Signal {
@@ -169,6 +170,22 @@ pub fn compute_signal(prices: &[f64]) -> Signal {
     } else {
         Signal::Hold
     }
+}
+
+// ── Pivots ─────────────────────────────────────────────────────────────────
+fn is_pivot_low(candles: &[Candle], i: usize, k: usize) -> bool {
+	if (i < k) {
+		return false
+	}
+	if (i + k) >= candles.len() {
+		return false
+	}
+	for j in i-k ..= i+k {
+		if candles[j].low <= candles[i].low {
+			return false
+		}
+	}
+	true
 }
 
 // ── Stop-Loss initial ────────────────────────────────────────────────────────
