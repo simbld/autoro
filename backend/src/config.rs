@@ -21,6 +21,12 @@ pub struct Config {
     pub trader_window_size: usize,
     /// Nombre de confirmations consécutives requises avant d'agir
     pub trader_confirm_ticks: i8,
+    /// Profit (en % du prix d'entrée) déclenchant le passage du SL en trailing
+    pub trader_tsl_trigger_pct: f64,
+    /// Écart (en % du prix courant) entre le prix et le SL trailing posé
+    pub trader_tsl_gap_pct: f64,
+    /// Autoriser l'ouverture de positions short sur signal Sell confirmé
+    pub trader_allow_short: bool,
     /// Clé API NewsAPI.org (optionnelle — sans clé, la route news renvoie 503)
     pub news_api_key: Option<String>,
 }
@@ -81,6 +87,18 @@ impl Config {
             .unwrap_or_else(|_| "3".into())
             .parse::<i8>()
             .unwrap_or(3);
+        let trader_tsl_trigger_pct = std::env::var("TRADER_TSL_TRIGGER_PCT")
+            .unwrap_or_else(|_| "5".into())
+            .parse::<f64>()
+            .unwrap_or(5.0);
+        let trader_tsl_gap_pct = std::env::var("TRADER_TSL_GAP_PCT")
+            .unwrap_or_else(|_| "3".into())
+            .parse::<f64>()
+            .unwrap_or(3.0);
+        let trader_allow_short = std::env::var("TRADER_ALLOW_SHORT")
+            .unwrap_or_else(|_| "true".into())
+            .parse::<bool>()
+            .unwrap_or(true);
 
         let news_api_key = std::env::var("NEWS_API_KEY").ok();
 
@@ -97,6 +115,9 @@ impl Config {
             trader_interval_secs,
             trader_window_size,
             trader_confirm_ticks,
+            trader_tsl_trigger_pct,
+            trader_tsl_gap_pct,
+            trader_allow_short,
             news_api_key,
         })
     }

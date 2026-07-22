@@ -1,13 +1,28 @@
 // /backend/src/trader.rs
-// Orchestre la boucle de trading automatique
+// Orchestre la boucle de trading automatique — stratégie V3 :
+// entrées long ET short filtrées par la tendance, SL fixe à l'ouverture,
+// bascule en trailing stop (TSL côté serveur eToro) une fois le trade en profit.
 
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use tokio::time::{interval, Duration};
 
 use crate::config::Config;
 use crate::etoro::EtoroClient;
-use crate::models::{ClosePositionRequest, CreateOrderRequest};
-use crate::strategy::{compute_signal, compute_sl_tp, Signal};
+use crate::models::{
+    ClosePositionRequest, CreateOrderRequest, EditPositionRequest, Position, StopLossType,
+};
+use crate::strategy::{compute_initial_sl, compute_signal, Signal};
+
+/// Suivi local d'une position ouverte par le bot.
+/// Nécessaire car `get_portfolio` est capricieux en demo (souvent 0 positions
+/// juste après une ouverture) — on garde donc notre propre état.
+struct TrackedPosition {
+    is_buy: bool,
+    /// Prix d'entrée (ask pour un long, bid pour un short)
+    entry: f64,
+    /// true une fois le PATCH stopLossType=trailing accepté par eToro
+    tsl_activated: bool,
+}
 
 pub struct Trader {
     client: EtoroClient,
@@ -23,8 +38,14 @@ pub struct Trader {
     confirm_counts: HashMap<i64, i8>,
     /// Nombre de confirmations consécutives requises avant d'agir.
     confirm_required: i8,
-    /// Instruments pour lesquels on a déjà une position ouverte (suivi local).
-    local_open: HashSet<i64>,
+    /// Profit (%) à partir duquel on bascule le SL en trailing.
+    tsl_trigger_pct: f64,
+    /// Écart (%) entre le prix courant et le SL trailing posé.
+    tsl_gap_pct: f64,
+    /// Autoriser les positions short sur signal Sell confirmé.
+    allow_short: bool,
+    /// Positions ouvertes par le bot (suivi local, réconcilié avec le portfolio).
+    open_tracks: HashMap<i64, TrackedPosition>,
 }
 
 impl Trader {
@@ -60,7 +81,10 @@ impl Trader {
             leverage: cfg.trader_leverage,
             window_size: cfg.trader_window_size,
             confirm_required: cfg.trader_confirm_ticks,
-            local_open: HashSet::new(),
+            tsl_trigger_pct: cfg.trader_tsl_trigger_pct,
+            tsl_gap_pct: cfg.trader_tsl_gap_pct,
+            allow_short: cfg.trader_allow_short,
+            open_tracks: HashMap::new(),
         };
 
         let mut ticker = interval(Duration::from_secs(cfg.trader_interval_secs));
@@ -82,24 +106,24 @@ impl Trader {
             }
         }
 
-        // 2. Portfolio (positions ouvertes) — optionnel, on utilise local_open en fallback
-        let open_positions: HashMap<i64, crate::models::Position> = match self.client.get_portfolio().await {
+        // 2. Portfolio (positions ouvertes) — on réconcilie le suivi local quand il répond
+        let open_positions: HashMap<i64, Position> = match self.client.get_portfolio().await {
             Ok(p) => {
-                // Ne mettre à jour local_open que si le portfolio contient des données
-                // (en demo l'API renvoie souvent 0 positions même après ouverture)
+                // En demo l'API renvoie souvent 0 positions même après ouverture :
+                // on ne réconcilie que si le portfolio contient des données.
                 if !p.positions.is_empty() {
-                    self.local_open = p.positions.iter().map(|pos| pos.instrument_id).collect();
+                    self.reconcile(&p.positions);
                 }
                 tracing::info!(
                     "Tick — solde: ${:.2} | positions ouvertes: {} (local: {})",
                     p.credit,
                     p.positions.len(),
-                    self.local_open.len()
+                    self.open_tracks.len()
                 );
                 p.positions.into_iter().map(|p| (p.instrument_id, p)).collect()
             }
             Err(e) => {
-                tracing::warn!("get_portfolio indisponible ({:?}), utilisation du suivi local ({} positions)", e, self.local_open.len());
+                tracing::warn!("get_portfolio indisponible ({:?}), utilisation du suivi local ({} positions)", e, self.open_tracks.len());
                 HashMap::new()
             }
         };
@@ -107,8 +131,6 @@ impl Trader {
         for rate in &all_rates {
             let id = rate.instrument_id;
             let symbol = self.instruments.get(&id).cloned().unwrap_or_default();
-            // Pour la fermeture, on a besoin du position_id depuis le vrai portfolio
-            let _ = &open_positions;
 
             // 3. Mise à jour fenêtre glissante
             let window = self.price_windows.entry(id).or_default();
@@ -133,56 +155,187 @@ impl Trader {
                     *count = 0;
                 }
             }
+            let count = *count;
 
             tracing::info!(
-                "{} ask={:.4}  signal={:?}  confirm={}/{}  window={}/{}",
-                symbol, rate.ask, signal, count.abs(), self.confirm_required,
+                "{} ask={:.4} bid={:.4}  signal={:?}  confirm={}/{}  window={}/{}",
+                symbol, rate.ask, rate.bid, signal, count.abs(), self.confirm_required,
                 window.len(), self.window_size
             );
 
-            // 5. Action uniquement si confirmé
-            if *count >= self.confirm_required {
-                if !self.local_open.contains(&id) {
-                    let (sl, tp) = compute_sl_tp(&prices, rate.ask);
+            // 5. Gestion du trailing stop sur les positions en profit
+            self.manage_trailing(id, &symbol, rate.bid, rate.ask, open_positions.get(&id)).await;
+
+            // 6. Action sur signal confirmé
+            let confirmed_buy = count >= self.confirm_required;
+            let confirmed_sell = count <= -self.confirm_required;
+            if !confirmed_buy && !confirmed_sell {
+                continue;
+            }
+            let want_buy = confirmed_buy;
+
+            match self.open_tracks.get(&id) {
+                // Déjà positionné dans le même sens → rien à faire
+                Some(track) if track.is_buy == want_buy => {}
+
+                // Signal opposé à la position ouverte → fermeture
+                Some(_) => {
+                    if let Some(pos) = open_positions.get(&id) {
+                        tracing::info!(
+                            "CLOSE {} position_id={} open={:.4} bid={:.4} (signal opposé confirmé)",
+                            symbol, pos.position_id, pos.open_rate, rate.bid
+                        );
+                        match self.client.close_position(pos.position_id, ClosePositionRequest { instrument_id: id, units_to_deduct: None }).await {
+                            Ok(resp) => {
+                                tracing::info!("Position fermée: {:?}", resp);
+                                self.open_tracks.remove(&id);
+                                self.confirm_counts.insert(id, 0);
+                            }
+                            Err(e) => tracing::error!("close_position failed: {:?}", e),
+                        }
+                    } else {
+                        tracing::warn!(
+                            "{} : signal opposé confirmé mais position_id inconnu (portfolio vide ce tick), nouvel essai au prochain tick",
+                            symbol
+                        );
+                    }
+                }
+
+                // Pas de position → ouverture dans le sens du signal
+                None => {
+                    if !want_buy && !self.allow_short {
+                        tracing::info!("{} : signal Sell confirmé mais TRADER_ALLOW_SHORT=false, on ignore", symbol);
+                        continue;
+                    }
+                    // Un long s'achète au ask, un short se vend au bid
+                    let entry = if want_buy { rate.ask } else { rate.bid };
+                    let sl = compute_initial_sl(&prices, entry, want_buy);
                     tracing::info!(
-                        "BUY {} @ {:.4}  SL={:.4}  TP={:.4}",
-                        symbol, rate.ask, sl, tp
+                        "{} {} @ {:.4}  SL={:.4}  (pas de TP — sortie par TSL)",
+                        if want_buy { "BUY" } else { "SHORT" }, symbol, entry, sl
                     );
                     let order = CreateOrderRequest {
                         instrument_id: id,
-                        is_buy: true,
+                        is_buy: want_buy,
                         leverage: self.leverage,
                         amount: Some(self.amount),
                         units: None,
                         stop_loss_rate: Some(sl),
-                        take_profit_rate: Some(tp),
-                        is_trailing_stop_loss: None,
+                        take_profit_rate: None,
+                        is_tsl_enabled: None,
+                        is_no_take_profit: Some(true),
                     };
                     match self.client.send_order(order).await {
                         Ok(resp) => {
                             tracing::info!("Ordre placé: {:?}", resp);
-                            self.local_open.insert(id);
+                            self.open_tracks.insert(id, TrackedPosition {
+                                is_buy: want_buy,
+                                entry,
+                                tsl_activated: false,
+                            });
+                            self.confirm_counts.insert(id, 0);
                         }
                         Err(e) => tracing::error!("send_order failed: {:?}", e),
                     }
-                    *count = 0;
-                }
-            } else if *count <= -self.confirm_required {
-                if let Some(pos) = open_positions.get(&id) {
-                    tracing::info!(
-                        "CLOSE {} position_id={} open={:.4} bid={:.4}",
-                        symbol, pos.position_id, pos.open_rate, rate.bid
-                    );
-                    match self.client.close_position(pos.position_id, ClosePositionRequest { instrument_id: id, units_to_deduct: None }).await {
-                        Ok(resp) => {
-                            tracing::info!("Position fermée: {:?}", resp);
-                            self.local_open.remove(&id);
-                        }
-                        Err(e) => tracing::error!("close_position failed: {:?}", e),
-                    }
-                    *count = 0;
                 }
             }
+        }
+    }
+
+    /// Aligne le suivi local sur le portfolio réel quand celui-ci répond.
+    /// Les positions disparues (fermées par SL/TSL côté eToro) sont retirées,
+    /// celles inconnues (ouvertes à la main par l'utilisateur) sont adoptées.
+    fn reconcile(&mut self, positions: &[Position]) {
+        let by_instrument: HashMap<i64, &Position> =
+            positions.iter().map(|p| (p.instrument_id, p)).collect();
+
+        self.open_tracks.retain(|id, _| {
+            let still_open = by_instrument.contains_key(id);
+            if !still_open {
+                tracing::info!(
+                    "{} : position absente du portfolio (fermée par SL/TSL), retrait du suivi local",
+                    self.instruments.get(id).map_or("?", |s| s.as_str())
+                );
+            }
+            still_open
+        });
+
+        for (&id, pos) in &by_instrument {
+            if self.instruments.contains_key(&id) && !self.open_tracks.contains_key(&id) {
+                tracing::info!(
+                    "{} : position trouvée dans le portfolio (id={}), adoption dans le suivi local",
+                    self.instruments.get(&id).map_or("?", |s| s.as_str()),
+                    pos.position_id
+                );
+                self.open_tracks.insert(id, TrackedPosition {
+                    is_buy: pos.is_buy,
+                    entry: pos.open_rate,
+                    tsl_activated: pos.is_tsl_enabled,
+                });
+            }
+        }
+    }
+
+    /// Bascule le SL en trailing dès que le trade est en profit de `tsl_trigger_pct` %.
+    /// Le PATCH exige le `positionId` (connu via le portfolio) — si le portfolio
+    /// était vide ce tick, on réessaie simplement au suivant.
+    async fn manage_trailing(
+        &mut self,
+        id: i64,
+        symbol: &str,
+        bid: f64,
+        ask: f64,
+        portfolio_pos: Option<&Position>,
+    ) {
+        let Some(track) = self.open_tracks.get(&id) else { return };
+        if track.tsl_activated {
+            return;
+        }
+
+        // Profit en % du prix d'entrée (un long se ferme au bid, un short au ask)
+        let profit_pct = if track.is_buy {
+            (bid - track.entry) / track.entry * 100.0
+        } else {
+            (track.entry - ask) / track.entry * 100.0
+        };
+        if profit_pct < self.tsl_trigger_pct {
+            return;
+        }
+
+        let Some(pos) = portfolio_pos else {
+            tracing::warn!(
+                "{} : profit {:.2}% ≥ seuil TSL {:.2}% mais position_id inconnu (portfolio vide ce tick)",
+                symbol, profit_pct, self.tsl_trigger_pct
+            );
+            return;
+        };
+
+        // Nouveau SL posé à gap% du prix courant, côté protecteur
+        let new_sl = if track.is_buy {
+            bid * (1.0 - self.tsl_gap_pct / 100.0)
+        } else {
+            ask * (1.0 + self.tsl_gap_pct / 100.0)
+        };
+        tracing::info!(
+            "TSL {} position_id={} profit={:.2}% → SL trailing @ {:.4} (gap {:.1}%)",
+            symbol, pos.position_id, profit_pct, new_sl, self.tsl_gap_pct
+        );
+
+        let req = EditPositionRequest {
+            stop_loss_rate: Some(new_sl),
+            stop_loss_type: Some(StopLossType::Trailing),
+            ..Default::default()
+        };
+        match self.client.edit_position(pos.position_id, req).await {
+            // Réponse 202 : la présence d'operationId confirme l'acceptation
+            Ok(resp) if resp.0.get("operationId").is_some() => {
+                tracing::info!("TSL activé sur {} : {:?}", symbol, resp);
+                if let Some(track) = self.open_tracks.get_mut(&id) {
+                    track.tsl_activated = true;
+                }
+            }
+            Ok(resp) => tracing::error!("edit_position refusé pour {} : {:?}", symbol, resp),
+            Err(e) => tracing::error!("edit_position failed pour {} : {:?}", symbol, e),
         }
     }
 }

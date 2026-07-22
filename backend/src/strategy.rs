@@ -134,15 +134,23 @@ fn macd_vote(prices: &[f64]) -> i8 {
 
 // ── Signal composite ─────────────────────────────────────────────────────────
 
-/// Vote 2/4 : signal retourné si au moins 2 indicateurs sont d'accord.
+/// Vote 2/4 filtré par la tendance : signal retourné si au moins 2 indicateurs
+/// sont d'accord ET que la tendance EMA7/EMA21 va dans le même sens.
+///
+/// Pourquoi le filtre : RSI et Bollinger sont des indicateurs de retour à la
+/// moyenne — en pleine chute ils votent Buy ("survendu") à deux voix, ce qui
+/// suffisait en V2 à ouvrir des longs contre la tendance. Ici un Buy n'est
+/// possible qu'en tendance haussière, un Sell qu'en tendance baissière :
+/// RSI/BB ne servent plus qu'à timer l'entrée dans le sens du courant.
 /// Minimum 35 prix requis (contrainte MACD : 26 + 9).
 pub fn compute_signal(prices: &[f64]) -> Signal {
     if prices.len() < 35 {
         return Signal::Hold;
     }
+    let trend = ema_cross_vote(prices);
     let votes = [
         rsi_vote(prices),
-        ema_cross_vote(prices),
+        trend,
         bollinger_vote(prices),
         macd_vote(prices),
     ];
@@ -150,35 +158,40 @@ pub fn compute_signal(prices: &[f64]) -> Signal {
     let sell_count = votes.iter().filter(|&&v| v == -1).count();
 
     tracing::debug!(
-        "votes RSI={} EMA={} BB={} MACD={} → buy={} sell={}",
-        votes[0], votes[1], votes[2], votes[3], buy_count, sell_count
+        "votes RSI={} EMA={} BB={} MACD={} → buy={} sell={} trend={}",
+        votes[0], votes[1], votes[2], votes[3], buy_count, sell_count, trend
     );
 
-    if buy_count >= 2 {
+    if buy_count >= 2 && trend == 1 {
         Signal::Buy
-    } else if sell_count >= 2 {
+    } else if sell_count >= 2 && trend == -1 {
         Signal::Sell
     } else {
         Signal::Hold
     }
 }
 
-// ── Stop-Loss / Take-Profit ──────────────────────────────────────────────────
+// ── Stop-Loss initial ────────────────────────────────────────────────────────
 
-/// Calcule SL/TP basé sur la volatilité récente (écart-type sur les 20 derniers prix).
-/// Ratio risque/rendement 1:2 → SL = entry − 1.5σ, TP = entry + 3σ.
-/// Floor minimum : 0.3 % du prix d'entrée pour éviter des niveaux trop proches.
+/// SL initial basé sur la volatilité récente (écart-type sur les 20 derniers prix).
+/// Pas de TP : la sortie gagnante est gérée par le TSL activé une fois en profit
+/// (stratégie V3 "let winners run").
+/// Long  : SL = entry − 1.5σ (cap perte max −10 %).
+/// Short : SL = entry + 1.5σ (cap perte max +10 % de hausse).
+/// Floor minimum : 0.3 % du prix d'entrée pour éviter un stop trop proche.
 #[allow(clippy::cast_precision_loss)]
-pub fn compute_sl_tp(prices: &[f64], entry: f64) -> (f64, f64) {
+pub fn compute_initial_sl(prices: &[f64], entry: f64, is_buy: bool) -> f64 {
     let period = prices.len().min(20);
     let slice = &prices[prices.len() - period..];
     let mean = slice.iter().sum::<f64>() / period as f64;
     let std = (slice.iter().map(|p| (p - mean).powi(2)).sum::<f64>() / period as f64)
         .sqrt()
         .max(entry * 0.003); // floor à 0.3 % du prix
-    let sl = (entry - 1.5 * std).max(entry * 0.90); // cap max perte à −10 %
-    let tp = entry + 3.0 * std;
-    (sl, tp)
+    if is_buy {
+        (entry - 1.5 * std).max(entry * 0.90)
+    } else {
+        (entry + 1.5 * std).min(entry * 1.10)
+    }
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -201,15 +214,28 @@ mod tests {
     }
 
     #[test]
-    fn test_sl_tp_ratio() {
+    fn test_initial_sl_long() {
         let prices = vec![100.0_f64; 20];
-        let (sl, tp) = compute_sl_tp(&prices, 100.0);
-        // Avec prix parfaitement plat, std = 0 → floor à 0.3 %
-        // SL = 100 - 1.5*0.3 = 99.55, TP = 100 + 3*0.3 = 100.9
-        assert!(sl < 100.0, "SL doit être sous le prix d'entrée");
-        assert!(tp > 100.0, "TP doit être au-dessus du prix d'entrée");
-        let risk = 100.0 - sl;
-        let reward = tp - 100.0;
-        assert!(reward > risk, "ratio R/R doit être > 1");
+        let sl = compute_initial_sl(&prices, 100.0, true);
+        // Prix parfaitement plat → std = 0 → floor à 0.3 % → SL = 100 − 1.5×0.3 = 99.55
+        assert!(sl < 100.0, "SL long doit être sous le prix d'entrée");
+        assert!(sl >= 90.0, "SL long ne doit pas dépasser −10 %");
+    }
+
+    #[test]
+    fn test_initial_sl_short() {
+        let prices = vec![100.0_f64; 20];
+        let sl = compute_initial_sl(&prices, 100.0, false);
+        // Symétrique du long : SL au-dessus de l'entrée, cap à +10 %
+        assert!(sl > 100.0, "SL short doit être au-dessus du prix d'entrée");
+        assert!(sl <= 110.0, "SL short ne doit pas dépasser +10 %");
+    }
+
+    #[test]
+    fn test_no_buy_against_downtrend() {
+        // Descente régulière : RSI/BB peuvent crier "survendu" mais la tendance
+        // EMA est baissière → jamais de Buy (le bug V2 "acheter le couteau qui tombe")
+        let prices: Vec<f64> = (0..40).map(|i| 200.0 - f64::from(i) * 2.0).collect();
+        assert_ne!(compute_signal(&prices), Signal::Buy);
     }
 }

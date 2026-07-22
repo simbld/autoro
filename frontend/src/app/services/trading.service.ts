@@ -16,9 +16,16 @@ export interface Position {
     tslRate: number | null;
 }
 
+export interface PendingOrder {
+    amount: number;
+    mirrorID: number;
+}
+
 export interface Portfolio {
     credit: number;
     positions: Position[];
+    ordersForOpen: PendingOrder[];
+    orders: PendingOrder[];
 }
 
 export interface InstrumentRate {

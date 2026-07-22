@@ -30,12 +30,42 @@ pub struct CreateOrderRequest {
     /// Taux de stop-loss (optionnel)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stop_loss_rate: Option<f64>,
-    /// Taux de take-profit (optionnel)F
+    /// Taux de take-profit (optionnel)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub take_profit_rate: Option<f64>,
-    /// Stop-loss suiveur (optionnel)
+    /// Stop-loss suiveur dès l'ouverture (optionnel).
+    /// L'API attend `IsTslEnabled`, pas `IsTrailingStopLoss`.
+    #[serde(rename = "IsTslEnabled", skip_serializing_if = "Option::is_none")]
+    pub is_tsl_enabled: Option<bool>,
+    /// true = pas de take-profit sur la position (laisser courir les gagnants)
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_trailing_stop_loss: Option<bool>,
+    pub is_no_take_profit: Option<bool>,
+}
+
+/// Type de stop-loss pour la modification d'une position ouverte (API v2)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum StopLossType {
+    Fixed,
+    Trailing,
+}
+
+/// Requête de modification SL/TP d'une position ouverte.
+/// Endpoint : PATCH /api/v2/trading/{demo/}positions/{positionId}
+/// Au moins un champ doit être renseigné. Réponse 202 (asynchrone).
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EditPositionRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stop_loss_rate: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub take_profit_rate: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stop_loss_type: Option<StopLossType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub clear_stop_loss: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub clear_take_profit: Option<bool>,
 }
 
 /// Réponse brute de l'API eToro pour les ordres (format variable selon l'endpoint).
