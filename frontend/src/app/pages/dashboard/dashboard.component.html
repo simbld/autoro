@@ -37,6 +37,13 @@
           <td mat-cell *matCellDef="let p">{{ p.amount | number:'1.2-2' }} $</td>
         </ng-container>
 
+                <ng-container matColumnDef="current">
+                    <th mat-header-cell *matHeaderCellDef>Prix actuel</th>
+                    <td mat-cell *matCellDef="let p">
+                        {{ prices[p.instrumentID] != null ? (prices[p.instrumentID] | number:'1.2-5') : '—' }}
+                    </td>
+                </ng-container>
+
         <ng-container matColumnDef="sl">
           <th mat-header-cell *matHeaderCellDef>Stop Loss</th>
           <td mat-cell *matCellDef="let p">{{ p.stopLossRate ?? '—' }}</td>
