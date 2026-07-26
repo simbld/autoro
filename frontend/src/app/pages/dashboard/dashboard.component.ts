@@ -1,10 +1,12 @@
-import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {Component, DestroyRef, inject} from "@angular/core";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
 import {MatCardModule} from "@angular/material/card";
-import {Portfolio, TradingService} from "../../services/trading.service";
-import {interval, Subscription, switchMap} from "rxjs";
+import {Portfolio, Position, TradingService} from "../../services/trading.service";
+import {interval, merge, of, Subject} from "rxjs";
+import {map, startWith, switchMap, tap} from "rxjs/operators";
 import {InstrumentNamePipe} from "../../pipes/instrument-name.pipe";
 
 @Component({
@@ -14,29 +16,33 @@ import {InstrumentNamePipe} from "../../pipes/instrument-name.pipe";
   styleUrl: './dashboard.component.scss'
 })
 
-export class DashboardComponent implements OnInit, OnDestroy {
-    private TradingService = inject(TradingService);
-    private sub!: Subscription;
+export class DashboardComponent {
+    private trading = inject(TradingService);
+    private destroyRef = inject(DestroyRef);
+    private refresh$ = new Subject<void>();
     portfolio: Portfolio | null = null;
-    columns = ['instrument', 'direction', 'openRate', 'sl', 'tp', 'tsl', 'close'];
+    prices: Record<number, number> = {}
+    columns = ['instrument', 'direction', 'openRate', 'amount', 'current', 'sl', 'tp', 'tsl', 'close'];
 
-    ngOnInit() {
-        this.load();
-        this.sub = interval(30000).pipe(
-            switchMap(() => this.TradingService.getPortfolio())
-        ).subscribe(d => this.portfolio = d);
-    }
-
-    load() {
-        this.TradingService.getPortfolio().subscribe(d => this.portfolio = d);
+    constructor() {
+        merge(interval(30000), this.refresh$).pipe(
+            startWith(0),
+            switchMap(() => this.trading.getPortfolio()),
+            tap(p => this.portfolio = p),
+            switchMap((p: Portfolio) => {
+                const ids = [...new Set(p.positions.map((x: Position) => x.instrumentID))];
+                return ids.length ? this.trading.getRates(ids.join(',')) : of({rates: []});
+            }),
+            map(r => Object.fromEntries(
+                r.rates.map(x => [x.instrumentID, (x.ask + x.bid) / 2])
+            ) as Record<number, number>),
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe(prices => this.prices = prices);
     }
 
     close(p: { positionID: number, instrumentID: number }) {
-        this.TradingService.closePosition(p.positionID, p.instrumentID).subscribe(() =>
-        this.load());
-    }
-
-    ngOnDestroy() {
-        this.sub.unsubscribe();
+        this.trading.closePosition(p.positionID, p.instrumentID)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.refresh$.next());
     }
 }
