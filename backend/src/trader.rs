@@ -14,13 +14,13 @@ use crate::models::{
 use crate::strategy::{compute_initial_sl, compute_signal, Signal};
 
 /// Suivi local d'une position ouverte par le bot.
-/// Nécessaire car `get_portfolio` est capricieux en demo (souvent 0 positions
+/// Nécessaire, car `get_portfolio` est capricieux en demo (souvent 0 positions
 /// juste après une ouverture) — on garde donc notre propre état.
 struct TrackedPosition {
     is_buy: bool,
     /// Prix d'entrée (ask pour un long, bid pour un short)
     entry: f64,
-    /// true une fois le PATCH stopLossType=trailing accepté par eToro
+    /// True une fois le PATCH stopLossType=trailing accepté par eToro
     tsl_activated: bool,
 }
 
@@ -68,7 +68,7 @@ impl Trader {
         }
 
         if instruments.is_empty() {
-            tracing::error!("No instruments resolved, trader will not start");
+            tracing::error!("No instruments resolved, trader won't start");
             return;
         }
 
@@ -109,7 +109,7 @@ impl Trader {
         // 2. Portfolio (positions ouvertes) — on réconcilie le suivi local quand il répond
         let open_positions: HashMap<i64, Position> = match self.client.get_portfolio().await {
             Ok(p) => {
-                // En demo l'API renvoie souvent 0 positions même après ouverture :
+                // En demo l'API ne renvoie souvent aucune position même après ouverture :
                 // on ne réconcilie que si le portfolio contient des données.
                 if !p.positions.is_empty() {
                     self.reconcile(&p.positions);
@@ -211,7 +211,7 @@ impl Trader {
                     let entry = if want_buy { rate.ask } else { rate.bid };
                     let sl = compute_initial_sl(&prices, entry, want_buy);
                     tracing::info!(
-                        "{} {} @ {:.4}  SL={:.4}  (pas de TP — sortie par TSL)",
+                        "{} {} @ {:.4} SL={:.4} (pas de TP — sortie par TSL)",
                         if want_buy { "BUY" } else { "SHORT" }, symbol, entry, sl
                     );
                     let order = CreateOrderRequest {
@@ -292,7 +292,7 @@ impl Trader {
             return;
         }
 
-        // Profit en % du prix d'entrée (un long se ferme au bid, un short au ask)
+        // Profit en % du prix d'entrée (un long se ferme au bid, un short à ask)
         let profit_pct = if track.is_buy {
             (bid - track.entry) / track.entry * 100.0
         } else {
@@ -317,7 +317,7 @@ impl Trader {
             ask * (1.0 + self.tsl_gap_pct / 100.0)
         };
         tracing::info!(
-            "TSL {} position_id={} profit={:.2}% → SL trailing @ {:.4} (gap {:.1}%)",
+            "TSL {} position_id={} profit={:.2}% → SL trailing @{:.4} (gap {:.1}%)",
             symbol, pos.position_id, profit_pct, new_sl, self.tsl_gap_pct
         );
 
@@ -327,7 +327,7 @@ impl Trader {
             ..Default::default()
         };
         match self.client.edit_position(pos.position_id, req).await {
-            // Réponse 202 : la présence d'operationId confirme l'acceptation
+            // Réponse 202 : la présence d'opérationId confirme l'acceptation
             Ok(resp) if resp.0.get("operationId").is_some() => {
                 tracing::info!("TSL activé sur {} : {:?}", symbol, resp);
                 if let Some(track) = self.open_tracks.get_mut(&id) {

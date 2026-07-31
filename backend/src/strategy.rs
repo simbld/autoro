@@ -1,5 +1,6 @@
 // /backend/src/strategy.rs
 // Stratégie V2 : vote majoritaire RSI + EMA croisée + Bollinger Bands + MACD
+use crate::models::Candle;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Signal {
@@ -62,14 +63,8 @@ fn rsi_vote(prices: &[f64]) -> i8 {
 fn ema_cross_vote(prices: &[f64]) -> i8 {
     const FAST: usize = 7;
     const SLOW: usize = 21;
-    let ema_fast = match compute_ema(prices, FAST) {
-        Some(v) => v,
-        None => return 0,
-    };
-    let ema_slow = match compute_ema(prices, SLOW) {
-        Some(v) => v,
-        None => return 0,
-    };
+    let Some(ema_fast) = compute_ema(prices, FAST) else { return 0 };
+    let Some(ema_slow) = compute_ema(prices, SLOW) else { return 0 };
     if ema_fast > ema_slow {
         1
     } else if ema_fast < ema_slow {
@@ -118,10 +113,7 @@ fn macd_vote(prices: &[f64]) -> i8 {
     if macd_series.len() < SIGNAL {
         return 0;
     }
-    let signal_line = match compute_ema(&macd_series, SIGNAL) {
-        Some(v) => v,
-        None => return 0,
-    };
+    let Some(signal_line) = compute_ema(&macd_series, SIGNAL) else { return 0 };
     let histogram = macd_series.last().unwrap() - signal_line;
     if histogram > 0.0 {
         1
@@ -171,12 +163,28 @@ pub fn compute_signal(prices: &[f64]) -> Signal {
     }
 }
 
+// ── Pivots ─────────────────────────────────────────────────────────────────
+fn is_pivot_low(candles: &[Candle], i: usize, k: usize) -> bool {
+    if i < k {
+        return false;
+    }
+    if i + k >= candles.len() {
+        return false;
+    }
+    for j in i - k..=i + k {
+        if j != i && candles[j].low < candles[i].low {
+            return false;
+        }
+    }
+    true
+}
+
 // ── Stop-Loss initial ────────────────────────────────────────────────────────
 
 /// SL initial basé sur la volatilité récente (écart-type sur les 20 derniers prix).
 /// Pas de TP : la sortie gagnante est gérée par le TSL activé une fois en profit
 /// (stratégie V3 "let winners run").
-/// Long  : SL = entry − 1.5σ (cap perte max −10 %).
+/// Long : SL = entry − 1.5σ (cap perte max −10 %).
 /// Short : SL = entry + 1.5σ (cap perte max +10 % de hausse).
 /// Floor minimum : 0.3 % du prix d'entrée pour éviter un stop trop proche.
 #[allow(clippy::cast_precision_loss)]

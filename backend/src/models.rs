@@ -34,7 +34,6 @@ pub struct CreateOrderRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub take_profit_rate: Option<f64>,
     /// Stop-loss suiveur dès l'ouverture (optionnel).
-    /// L'API attend `IsTslEnabled`, pas `IsTrailingStopLoss`.
     #[serde(rename = "IsTslEnabled", skip_serializing_if = "Option::is_none")]
     pub is_tsl_enabled: Option<bool>,
     /// true = pas de take-profit sur la position (laisser courir les gagnants)
@@ -69,7 +68,6 @@ pub struct EditPositionRequest {
 }
 
 /// Réponse brute de l'API eToro pour les ordres (format variable selon l'endpoint).
-/// On utilise `serde_json::Value` pour accepter n'importe quelle structure.
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct CreateOrderResponse(pub serde_json::Value);
@@ -108,7 +106,7 @@ pub struct Position {
     pub tsl_rate: Option<f64>,
 }
 
-/// Portfolio complet du client (réponse PnL)
+/// Portfolio complet du client (réponse `PnL`)
 /// Endpoint : GET /trading/info/{real|demo}/pnl
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -208,7 +206,7 @@ pub struct NewsResponse {
 /// Item d'historique de trading (position fermée)
 /// Endpoint : GET /trading/history/real
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
+#[serde(rename_all = "camelCase")]
 pub struct TradeHistoryItem {
     pub position_id: i64,
     pub instrument_id: i64,
@@ -223,30 +221,37 @@ pub struct TradeHistoryItem {
     pub close_timestamp: chrono::DateTime<chrono::Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct InstrumentImage {
-	#[serde(rename = "instrumentID")]
-	pub instrument_id: i64,
-	pub width: f64,
-	pub height: f64,
-	pub uri: String,
-	pub background_color: Option<String>,
-	pub text_color: Option<String>,
+/// Réponse de la route `/trade/history`
+#[derive(Debug, Deserialize)]
+pub struct HistoryResponse {
+	pub items: Vec<TradeHistoryItem>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+/// Une bougie OHLCV individuelle.
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InstrumentDisplayData {
+pub struct Candle {
 	#[serde(rename = "instrumentID")]
 	pub instrument_id: i64,
-	pub instrument_display_name: Option<String>,
-	pub symbol_full: String,
-	pub images: Vec<InstrumentImage>
+	pub from_date: chrono::DateTime<chrono::Utc>,
+	pub open: f64,
+	pub high: f64,
+	pub low: f64,
+	pub close: f64,
+	pub volume: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+/// Groupe de bougies d'un instrument.
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InstrumentDisplayResponse {
-	pub instrument_display_datas: Vec<InstrumentDisplayData>
+pub struct InstrumentCandles {
+	pub instrument_id: i64,
+	pub candles: Vec<Candle>,
+}
+
+/// Enveloppe complète de la réponse.
+#[derive(Debug, Deserialize)]
+pub struct CandlesResponse {
+	pub interval: String,
+	pub candles: Vec<InstrumentCandles>,
 }
