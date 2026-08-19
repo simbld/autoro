@@ -40,6 +40,10 @@ export class DashboardComponent {
         ).subscribe(prices => this.prices = prices);
     }
 
+    refresh() {
+        this.refresh$.next();
+    }
+
     close(p: { positionID: number, instrumentID: number }) {
         this.trading.closePosition(p.positionID, p.instrumentID)
             .pipe(takeUntilDestroyed(this.destroyRef))
