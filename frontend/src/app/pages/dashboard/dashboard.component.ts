@@ -22,7 +22,7 @@ export class DashboardComponent {
     private refresh$ = new Subject<void>();
     portfolio: Portfolio | null = null;
     prices: Record<number, number> = {}
-    columns = ['instrument', 'direction', 'openRate', 'amount', 'current', 'sl', 'tp', 'tsl', 'close'];
+    columns = ['instrument', 'direction', 'openRate', 'amount', 'current', 'sl', 'pnl', 'tsl', 'close'];
 
     constructor() {
         merge(interval(30000), this.refresh$).pipe(
