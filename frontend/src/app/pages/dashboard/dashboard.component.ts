@@ -49,4 +49,13 @@ export class DashboardComponent {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe(() => this.refresh$.next());
     }
+    pnl(p: Position): number | null {
+        const current = this.prices[p.instrumentID];
+        if (current == null) return null;
+
+        return
+
+
+
+    }
 }
