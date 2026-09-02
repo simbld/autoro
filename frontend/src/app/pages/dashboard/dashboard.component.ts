@@ -43,19 +43,15 @@ export class DashboardComponent {
     refresh() {
         this.refresh$.next();
     }
+    pnl(p: Position): number | null {
+        const current = this.prices[p.instrumentID];
+        if (current == null) return null;
+        return (current - p.openRate) * p.units * (p.isBuy ? 1 : -1);
+    }
 
     close(p: { positionID: number, instrumentID: number }) {
         this.trading.closePosition(p.positionID, p.instrumentID)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe(() => this.refresh$.next());
-    }
-    pnl(p: Position): number | null {
-        const current = this.prices[p.instrumentID];
-        if (current == null) return null;
-
-        return
-
-
-
     }
 }
