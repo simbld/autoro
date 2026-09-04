@@ -49,14 +49,14 @@
           <td mat-cell *matCellDef="let p">{{ p.stopLossRate ?? '—' }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="tp">
-          <th mat-header-cell *matHeaderCellDef>Take Profit</th>
+        <ng-container matColumnDef="pnl">
+          <th mat-header-cell *matHeaderCellDef>Profit & Loss</th>
           <td mat-cell *matCellDef="let p">{{ p.takeProfitRate ?? '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="tsl">
           <th mat-header-cell *matHeaderCellDef>TSL</th>
-          <td mat-cell *matCellDef="let p">{{ p.isTslEnabled ? (p.tslRate ?? '—') : '—' }}</td>
+          <td mat-cell *matCellDef="let p">{{ pnl(p) != null ? (pnl(p) | number:'1.2-2') + ' $' : '—' }} </td>
         </ng-container>
 
         <ng-container matColumnDef="close">
