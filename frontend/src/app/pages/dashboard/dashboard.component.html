@@ -51,7 +51,7 @@
 
         <ng-container matColumnDef="pnl">
           <th mat-header-cell *matHeaderCellDef>Profit & Loss</th>
-          <td mat-cell *matCellDef="let p">{{ pnl(p) != null ? (pnl(p) | number:'1.2-2') + ' $' : '—' }}</td>
+          <td mat-cell *matCellDef="let p" [class.profit]="pnl(p)! > 0" [class.loss]="pnl(p)! < 0">{{ pnl(p) != null ? (pnl(p) | number:'1.2-2') + ' $' : '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="tsl">
