@@ -38,6 +38,19 @@ export class DashboardComponent {
             ) as Record<number, number>),
             takeUntilDestroyed(this.destroyRef)
         ).subscribe(prices => this.prices = prices);
+
+        interval(5000).pipe(
+            startWith(0),
+            switchMap(() => {
+                const ids = [...new Set((this.portfolio?.positions ?? []).map(x => x.instrumentID))];
+                if (!ids.length) return of({rates: []});
+                return this.trading.getRates(ids.join(','));
+            }),
+            map(r => Object.fromEntries(
+                r.rates.map(x => [x.instrumentID, (x.ask + x.bid) / 2])
+            ) as Record<number, number>),
+        takeUntilDestroyed(this.destroyRef)
+        ).subscribe(prices => this.prices = prices);
     }
 
     refresh() {
