@@ -91,12 +91,13 @@ impl EtoroClient {
     }
 
     pub async fn get_rates(&self, instrument_ids: &[i64]) -> Result<InstrumentRatesResponse, reqwest::Error> {
-        let params: Vec<(&str, String)> = instrument_ids
-            .iter()
-            .map(|id| ("instrumentIds", id.to_string()))
-            .collect();
-        self.get("/api/v1/market-data/instruments/rates")
-            .query(&params)
+		let ids = instrument_ids
+			.iter()
+			.map(ToString::to_string)
+			.collect::<Vec<_>>()
+			.join(",");
+		self.get("/api/v1/market-data/instruments/rates")
+			.query(&[("instrumentIds", ids)])
             .send().await?
             .error_for_status()?
             .json::<InstrumentRatesResponse>()
