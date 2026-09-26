@@ -6,7 +6,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatCardModule} from "@angular/material/card";
 import {Portfolio, Position, TradingService} from "../../services/trading.service";
 import {interval, merge, of, Subject} from "rxjs";
-import {map, startWith, switchMap, tap} from "rxjs/operators";
+import {map, startWith, switchMap} from "rxjs/operators";
 import {InstrumentNamePipe} from "../../pipes/instrument-name.pipe";
 
 @Component({
@@ -28,16 +28,8 @@ export class DashboardComponent {
         merge(interval(30000), this.refresh$).pipe(
             startWith(0),
             switchMap(() => this.trading.getPortfolio()),
-            tap(p => this.portfolio = p),
-            switchMap((p: Portfolio) => {
-                const ids = [...new Set(p.positions.map((x: Position) => x.instrumentID))];
-                return ids.length ? this.trading.getRates(ids.join(',')) : of({rates: []});
-            }),
-            map(r => Object.fromEntries(
-                r.rates.map(x => [x.instrumentID, (x.ask + x.bid) / 2])
-            ) as Record<number, number>),
             takeUntilDestroyed(this.destroyRef)
-        ).subscribe(prices => this.prices = prices);
+        ).subscribe(p => this.portfolio = p);
 
         interval(5000).pipe(
             startWith(0),
