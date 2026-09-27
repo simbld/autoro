@@ -5,8 +5,8 @@ import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
 import {MatCardModule} from "@angular/material/card";
 import {Portfolio, Position, TradingService} from "../../services/trading.service";
-import {interval, merge, of, Subject} from "rxjs";
-import {map, startWith, switchMap} from "rxjs/operators";
+import {EMPTY,interval, merge, of, Subject} from "rxjs";
+import {catchError, map, startWith, switchMap} from "rxjs/operators";
 import {InstrumentNamePipe} from "../../pipes/instrument-name.pipe";
 
 @Component({
@@ -27,7 +27,7 @@ export class DashboardComponent {
     constructor() {
         merge(interval(30000), this.refresh$).pipe(
             startWith(0),
-            switchMap(() => this.trading.getPortfolio()),
+            switchMap(() => this.trading.getPortfolio().pipe(catchError(() => EMPTY))),
             takeUntilDestroyed(this.destroyRef)
         ).subscribe(p => this.portfolio = p);
 
@@ -36,7 +36,7 @@ export class DashboardComponent {
             switchMap(() => {
                 const ids = [...new Set((this.portfolio?.positions ?? []).map(x => x.instrumentID))];
                 if (!ids.length) return of({rates: []});
-                return this.trading.getRates(ids.join(','));
+                return this.trading.getRates(ids.join(',')).pipe(catchError(() => EMPTY));
             }),
             map(r => Object.fromEntries(
                 r.rates.map(x => [x.instrumentID, (x.ask + x.bid) / 2])
