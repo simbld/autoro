@@ -41,7 +41,7 @@ export class DashboardComponent {
             map(r => Object.fromEntries(
                 r.rates.map(x => [x.instrumentID, (x.ask + x.bid) / 2])
             ) as Record<number, number>),
-        takeUntilDestroyed(this.destroyRef)
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe(prices => this.prices = prices);
     }
 
