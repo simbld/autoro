@@ -44,10 +44,7 @@ fn symbol_to_query(symbol: &str) -> &str {
 
 // ── Client NewsAPI ────────────────────────────────────────────────────────────
 
-pub async fn fetch_news(
-    api_key: &str,
-    symbol: &str,
-) -> Result<NewsResponse, reqwest::Error> {
+pub async fn fetch_news(api_key: &str, symbol: &str) -> Result<NewsResponse, reqwest::Error> {
     let query = symbol_to_query(symbol);
     let client = Client::new();
     let url = format!(
@@ -59,21 +56,21 @@ pub async fn fetch_news(
          &apiKey={api_key}"
     );
 
-	let raw = client
-		.get(&url)
-		.header("User-Agent", "autoro-trader/1.0")
-		.send()
-		.await?
-		.text()
-		.await?;
-	
-	tracing::info!("NewsAPI raw: {}", &raw[..200.min(raw.len())]);
-	let resp: NewsApiResponse = serde_json::from_str(&raw).unwrap_or_else(|e| {
-		tracing::error!("NewsAPI parse error: {:?}", e);
-		NewsApiResponse { articles: vec![] }
-	});
+    let raw = client
+        .get(&url)
+        .header("User-Agent", "autoro-trader/1.0")
+        .send()
+        .await?
+        .text()
+        .await?;
 
-	let articles: Vec<NewsArticle> = resp
+    tracing::info!("NewsAPI raw: {}", &raw[..200.min(raw.len())]);
+    let resp: NewsApiResponse = serde_json::from_str(&raw).unwrap_or_else(|e| {
+        tracing::error!("NewsAPI parse error: {:?}", e);
+        NewsApiResponse { articles: vec![] }
+    });
+
+    let articles: Vec<NewsArticle> = resp
         .articles
         .into_iter()
         .filter(|a| a.title.as_deref().unwrap_or("") != "[Removed]")
