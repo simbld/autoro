@@ -2,7 +2,6 @@
 
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, Serialize)]
 pub struct Health {
     pub ok: bool,
@@ -146,8 +145,8 @@ pub struct InstrumentSearchItem {
     pub instrument_id: i64,
     pub instrument_display_name: Option<String>,
     pub internal_symbol_full: String,
-	pub daily_price_change: Option<f64>,
-	pub abs_daily_price_change: Option<f64>,
+    pub daily_price_change: Option<f64>,
+    pub abs_daily_price_change: Option<f64>,
 }
 
 /// Réponse complète de la recherche d'instruments
@@ -171,12 +170,12 @@ pub struct InstrumentCatalogItem {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstrumentRate {
-		#[serde(rename = "instrumentID")]
-		pub instrument_id: i64,
-		pub ask: f64,
-		pub bid: f64,
-		pub last_execution: Option<f64>,
-		pub date: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "instrumentID")]
+    pub instrument_id: i64,
+    pub ask: f64,
+    pub bid: f64,
+    pub last_execution: Option<f64>,
+    pub date: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 /// Réponse de l'endpoint des taux de marché
@@ -224,34 +223,34 @@ pub struct TradeHistoryItem {
 /// Réponse de la route `/trade/history`
 #[derive(Debug, Deserialize)]
 pub struct HistoryResponse {
-	pub items: Vec<TradeHistoryItem>,
+    pub items: Vec<TradeHistoryItem>,
 }
 
 /// Une bougie OHLCV individuelle.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Candle {
-	#[serde(rename = "instrumentID")]
-	pub instrument_id: i64,
-	pub from_date: chrono::DateTime<chrono::Utc>,
-	pub open: f64,
-	pub high: f64,
-	pub low: f64,
-	pub close: f64,
-	pub volume: f64,
+    #[serde(rename = "instrumentID")]
+    pub instrument_id: i64,
+    pub from_date: chrono::DateTime<chrono::Utc>,
+    pub open: f64,
+    pub high: f64,
+    pub low: f64,
+    pub close: f64,
+    pub volume: f64,
 }
 
 /// Groupe de bougies d'un instrument.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstrumentCandles {
-	pub instrument_id: i64,
-	pub candles: Vec<Candle>,
+    pub instrument_id: i64,
+    pub candles: Vec<Candle>,
 }
 
 /// Enveloppe complète de la réponse.
 #[derive(Debug, Deserialize)]
 pub struct CandlesResponse {
-	pub interval: String,
-	pub candles: Vec<InstrumentCandles>,
+    pub interval: String,
+    pub candles: Vec<InstrumentCandles>,
 }
