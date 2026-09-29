@@ -1,7 +1,11 @@
 // /backend/src/etoro.rs
+use crate::models::{
+    CandlesResponse, ClientPortfolio, ClosePositionRequest, CreateOrderRequest,
+    CreateOrderResponse, EditPositionRequest, HistoryResponse, InstrumentRatesResponse,
+    InstrumentSearchResponse, PortfolioResponse, TradeHistoryItem,
+};
 use reqwest::Client;
 use uuid::Uuid;
-use crate::models::{CandlesResponse, ClientPortfolio, ClosePositionRequest, CreateOrderRequest, CreateOrderResponse, EditPositionRequest, HistoryResponse, InstrumentRatesResponse, InstrumentSearchResponse, PortfolioResponse, TradeHistoryItem};
 
 #[derive(Clone)]
 pub struct EtoroClient {
@@ -15,20 +19,20 @@ pub struct EtoroClient {
 
 #[derive(Debug, Clone, Copy)]
 pub enum CandleInterval {
-	FiveMinutes,
-	FifteenMinutes,
-	ThirtyMinutes,
+    FiveMinutes,
+    FifteenMinutes,
+    ThirtyMinutes,
 }
 
 impl CandleInterval {
-	/// Seul endroit du code où les chaînes exactes de l'API existent.
-	fn as_str(self) -> &'static str {
-		match self {
-			Self::FiveMinutes => "FiveMinutes",
-			Self::FifteenMinutes => "FifteenMinutes",
-			Self::ThirtyMinutes => "ThirtyMinutes",
-		}
-	}
+    /// Seul endroit du code où les chaînes exactes de l'API existent.
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::FiveMinutes => "FiveMinutes",
+            Self::FifteenMinutes => "FifteenMinutes",
+            Self::ThirtyMinutes => "ThirtyMinutes",
+        }
+    }
 }
 
 impl std::fmt::Debug for EtoroClient {
@@ -81,24 +85,32 @@ impl EtoroClient {
             .header("x-request-id", Uuid::new_v4().to_string())
     }
 
-    pub async fn search_instrument(&self, symbol: &str) -> Result<InstrumentSearchResponse, reqwest::Error> {
+    pub async fn search_instrument(
+        &self,
+        symbol: &str,
+    ) -> Result<InstrumentSearchResponse, reqwest::Error> {
         self.get("/api/v1/market-data/search")
             .query(&[("internalSymbolFull", symbol)])
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
             .json::<InstrumentSearchResponse>()
             .await
     }
 
-    pub async fn get_rates(&self, instrument_ids: &[i64]) -> Result<InstrumentRatesResponse, reqwest::Error> {
-		let ids = instrument_ids
-			.iter()
-			.map(ToString::to_string)
-			.collect::<Vec<_>>()
-			.join(",");
-		self.get("/api/v1/market-data/instruments/rates")
-			.query(&[("instrumentIds", ids)])
-            .send().await?
+    pub async fn get_rates(
+        &self,
+        instrument_ids: &[i64],
+    ) -> Result<InstrumentRatesResponse, reqwest::Error> {
+        let ids = instrument_ids
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(",");
+        self.get("/api/v1/market-data/instruments/rates")
+            .query(&[("instrumentIds", ids)])
+            .send()
+            .await?
             .error_for_status()?
             .json::<InstrumentRatesResponse>()
             .await
@@ -106,7 +118,8 @@ impl EtoroClient {
 
     pub async fn get_portfolio(&self) -> Result<ClientPortfolio, reqwest::Error> {
         self.get(&format!("/api/v1/trading/info/{}/pnl", self.mode))
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
             .json::<PortfolioResponse>()
             .await
@@ -118,9 +131,14 @@ impl EtoroClient {
         position_id: i64,
         payload: ClosePositionRequest,
     ) -> Result<CreateOrderResponse, reqwest::Error> {
-        let resp = self.post(&format!("/api/v1/trading/execution/{}/market-close-orders/positions/{position_id}", self.mode))
+        let resp = self
+            .post(&format!(
+                "/api/v1/trading/execution/{}/market-close-orders/positions/{position_id}",
+                self.mode
+            ))
             .json(&payload)
-            .send().await?;
+            .send()
+            .await?;
         let status = resp.status();
         let text = resp.text().await?;
         tracing::debug!("close_position status={} body={}", status, text);
@@ -137,9 +155,13 @@ impl EtoroClient {
         payload: EditPositionRequest,
     ) -> Result<CreateOrderResponse, reqwest::Error> {
         let mode_segment = if self.mode == "demo" { "demo/" } else { "" };
-        let resp = self.patch(&format!("/api/v2/trading/{mode_segment}positions/{position_id}"))
+        let resp = self
+            .patch(&format!(
+                "/api/v2/trading/{mode_segment}positions/{position_id}"
+            ))
             .json(&payload)
-            .send().await?;
+            .send()
+            .await?;
         let status = resp.status();
         let text = resp.text().await?;
         tracing::debug!("edit_position status={} body={}", status, text);
@@ -148,47 +170,58 @@ impl EtoroClient {
         Ok(CreateOrderResponse(value))
     }
 
-    pub async fn get_history(&self, min_date: &str) -> Result<Vec<TradeHistoryItem>, reqwest::Error> {
-		let mode_segment = if self.mode == "demo" { "demo/" } else { "" };
-		let resp =
-        self.get(&format!("/api/v1/trading/info/trade/{mode_segment}history"))
+    pub async fn get_history(
+        &self,
+        min_date: &str,
+    ) -> Result<Vec<TradeHistoryItem>, reqwest::Error> {
+        let mode_segment = if self.mode == "demo" { "demo/" } else { "" };
+        let resp = self
+            .get(&format!("/api/v1/trading/info/trade/{mode_segment}history"))
             .query(&[("minDate", min_date)])
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
             .json::<HistoryResponse>()
             .await?;
-		Ok(resp.items)
+        Ok(resp.items)
     }
 
-    pub async fn send_order(&self, payload: CreateOrderRequest) -> Result<CreateOrderResponse, reqwest::Error> {
+    pub async fn send_order(
+        &self,
+        payload: CreateOrderRequest,
+    ) -> Result<CreateOrderResponse, reqwest::Error> {
         let endpoint = if payload.amount.is_some() {
             "market-open-orders/by-amount"
         } else {
             "market-open-orders/by-units"
         };
-        self.post(&format!("/api/v1/trading/execution/{}/{endpoint}", self.mode))
-            .json(&payload)
-            .send().await?
-            .error_for_status()?
-            .json::<CreateOrderResponse>()
-            .await
+        self.post(&format!(
+            "/api/v1/trading/execution/{}/{endpoint}",
+            self.mode
+        ))
+        .json(&payload)
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<CreateOrderResponse>()
+        .await
     }
 
-	/// Get candles for a given instrument (API v3
-	pub async fn get_candles(
-		&self,
-		instrument_id: i64,
-		interval: CandleInterval,
-		count: u32,
-	) -> Result<CandlesResponse, reqwest::Error> {
-		self.get(&format!(
-			"/api/v1/market-data/instruments/{instrument_id}/history/candles/asc/{}/{count}",
-			interval.as_str()
-		))
-			.send().await?
-			.error_for_status()?
-			.json::<CandlesResponse>()
-			.await
-	}
+    /// Get candles for a given instrument (API v3
+    pub async fn get_candles(
+        &self,
+        instrument_id: i64,
+        interval: CandleInterval,
+        count: u32,
+    ) -> Result<CandlesResponse, reqwest::Error> {
+        self.get(&format!(
+            "/api/v1/market-data/instruments/{instrument_id}/history/candles/asc/{}/{count}",
+            interval.as_str()
+        ))
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<CandlesResponse>()
+        .await
+    }
 }
-
