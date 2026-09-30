@@ -63,8 +63,12 @@ fn rsi_vote(prices: &[f64]) -> i8 {
 fn ema_cross_vote(prices: &[f64]) -> i8 {
     const FAST: usize = 7;
     const SLOW: usize = 21;
-    let Some(ema_fast) = compute_ema(prices, FAST) else { return 0 };
-    let Some(ema_slow) = compute_ema(prices, SLOW) else { return 0 };
+    let Some(ema_fast) = compute_ema(prices, FAST) else {
+        return 0;
+    };
+    let Some(ema_slow) = compute_ema(prices, SLOW) else {
+        return 0;
+    };
     if ema_fast > ema_slow {
         1
     } else if ema_fast < ema_slow {
@@ -113,7 +117,9 @@ fn macd_vote(prices: &[f64]) -> i8 {
     if macd_series.len() < SIGNAL {
         return 0;
     }
-    let Some(signal_line) = compute_ema(&macd_series, SIGNAL) else { return 0 };
+    let Some(signal_line) = compute_ema(&macd_series, SIGNAL) else {
+        return 0;
+    };
     let histogram = macd_series.last().unwrap() - signal_line;
     if histogram > 0.0 {
         1
@@ -151,7 +157,13 @@ pub fn compute_signal(prices: &[f64]) -> Signal {
 
     tracing::debug!(
         "votes RSI={} EMA={} BB={} MACD={} → buy={} sell={} trend={}",
-        votes[0], votes[1], votes[2], votes[3], buy_count, sell_count, trend
+        votes[0],
+        votes[1],
+        votes[2],
+        votes[3],
+        buy_count,
+        sell_count,
+        trend
     );
 
     if buy_count >= 2 && trend == 1 {
