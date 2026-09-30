@@ -4,14 +4,14 @@
 // bascule en trailing stop (TSL côté serveur eToro) une fois le trade en profit.
 
 use std::collections::{HashMap, VecDeque};
-use tokio::time::{interval, Duration};
+use tokio::time::{Duration, interval};
 
 use crate::config::Config;
 use crate::etoro::EtoroClient;
 use crate::models::{
     ClosePositionRequest, CreateOrderRequest, EditPositionRequest, Position, StopLossType,
 };
-use crate::strategy::{compute_initial_sl, compute_signal, Signal};
+use crate::strategy::{Signal, compute_initial_sl, compute_signal};
 
 /// Suivi local d'une position ouverte par le bot.
 /// Nécessaire, car `get_portfolio` est capricieux en demo (souvent 0 positions
@@ -56,8 +56,16 @@ impl Trader {
         for symbol in &cfg.trader_symbols {
             match client.search_instrument(symbol).await {
                 Ok(resp) => {
-                    if let Some(item) = resp.items.iter().find(|i| &i.internal_symbol_full == symbol) {
-                        tracing::info!("Resolved {} → instrument_id={}", symbol, item.instrument_id);
+                    if let Some(item) = resp
+                        .items
+                        .iter()
+                        .find(|i| &i.internal_symbol_full == symbol)
+                    {
+                        tracing::info!(
+                            "Resolved {} → instrument_id={}",
+                            symbol,
+                            item.instrument_id
+                        );
                         instruments.insert(item.instrument_id, symbol.clone());
                     } else {
                         tracing::warn!("Symbol {} not found in search results", symbol);
@@ -74,7 +82,10 @@ impl Trader {
 
         let mut trader = Self {
             client,
-            price_windows: instruments.keys().map(|&id| (id, VecDeque::new())).collect(),
+            price_windows: instruments
+                .keys()
+                .map(|&id| (id, VecDeque::new()))
+                .collect(),
             confirm_counts: instruments.keys().map(|&id| (id, 0i8)).collect(),
             instruments,
             amount: cfg.trader_amount,
@@ -120,10 +131,17 @@ impl Trader {
                     p.positions.len(),
                     self.open_tracks.len()
                 );
-                p.positions.into_iter().map(|p| (p.instrument_id, p)).collect()
+                p.positions
+                    .into_iter()
+                    .map(|p| (p.instrument_id, p))
+                    .collect()
             }
             Err(e) => {
-                tracing::warn!("get_portfolio indisponible ({:?}), utilisation du suivi local ({} positions)", e, self.open_tracks.len());
+                tracing::warn!(
+                    "get_portfolio indisponible ({:?}), utilisation du suivi local ({} positions)",
+                    e,
+                    self.open_tracks.len()
+                );
                 HashMap::new()
             }
         };
@@ -146,10 +164,18 @@ impl Trader {
             let count = self.confirm_counts.entry(id).or_insert(0);
             match signal {
                 Signal::Buy => {
-                    *count = if *count >= 0 { count.saturating_add(1) } else { 1 };
+                    *count = if *count >= 0 {
+                        count.saturating_add(1)
+                    } else {
+                        1
+                    };
                 }
                 Signal::Sell => {
-                    *count = if *count <= 0 { count.saturating_sub(1) } else { -1 };
+                    *count = if *count <= 0 {
+                        count.saturating_sub(1)
+                    } else {
+                        -1
+                    };
                 }
                 Signal::Hold => {
                     *count = 0;
@@ -159,12 +185,19 @@ impl Trader {
 
             tracing::info!(
                 "{} ask={:.4} bid={:.4}  signal={:?}  confirm={}/{}  window={}/{}",
-                symbol, rate.ask, rate.bid, signal, count.abs(), self.confirm_required,
-                window.len(), self.window_size
+                symbol,
+                rate.ask,
+                rate.bid,
+                signal,
+                count.abs(),
+                self.confirm_required,
+                window.len(),
+                self.window_size
             );
 
             // 5. Gestion du trailing stop sur les positions en profit
-            self.manage_trailing(id, &symbol, rate.bid, rate.ask, open_positions.get(&id)).await;
+            self.manage_trailing(id, &symbol, rate.bid, rate.ask, open_positions.get(&id))
+                .await;
 
             // 6. Action sur signal confirmé
             let confirmed_buy = count >= self.confirm_required;
@@ -183,9 +216,22 @@ impl Trader {
                     if let Some(pos) = open_positions.get(&id) {
                         tracing::info!(
                             "CLOSE {} position_id={} open={:.4} bid={:.4} (signal opposé confirmé)",
-                            symbol, pos.position_id, pos.open_rate, rate.bid
+                            symbol,
+                            pos.position_id,
+                            pos.open_rate,
+                            rate.bid
                         );
-                        match self.client.close_position(pos.position_id, ClosePositionRequest { instrument_id: id, units_to_deduct: None }).await {
+                        match self
+                            .client
+                            .close_position(
+                                pos.position_id,
+                                ClosePositionRequest {
+                                    instrument_id: id,
+                                    units_to_deduct: None,
+                                },
+                            )
+                            .await
+                        {
                             Ok(resp) => {
                                 tracing::info!("Position fermée: {:?}", resp);
                                 self.open_tracks.remove(&id);
@@ -204,7 +250,10 @@ impl Trader {
                 // Pas de position → ouverture dans le sens du signal
                 None => {
                     if !want_buy && !self.allow_short {
-                        tracing::info!("{} : signal Sell confirmé mais TRADER_ALLOW_SHORT=false, on ignore", symbol);
+                        tracing::info!(
+                            "{} : signal Sell confirmé mais TRADER_ALLOW_SHORT=false, on ignore",
+                            symbol
+                        );
                         continue;
                     }
                     // Un long s'achète au ask, un short se vend au bid
@@ -212,7 +261,10 @@ impl Trader {
                     let sl = compute_initial_sl(&prices, entry, want_buy);
                     tracing::info!(
                         "{} {} @ {:.4} SL={:.4} (pas de TP — sortie par TSL)",
-                        if want_buy { "BUY" } else { "SHORT" }, symbol, entry, sl
+                        if want_buy { "BUY" } else { "SHORT" },
+                        symbol,
+                        entry,
+                        sl
                     );
                     let order = CreateOrderRequest {
                         instrument_id: id,
@@ -228,11 +280,14 @@ impl Trader {
                     match self.client.send_order(order).await {
                         Ok(resp) => {
                             tracing::info!("Ordre placé: {:?}", resp);
-                            self.open_tracks.insert(id, TrackedPosition {
-                                is_buy: want_buy,
-                                entry,
-                                tsl_activated: false,
-                            });
+                            self.open_tracks.insert(
+                                id,
+                                TrackedPosition {
+                                    is_buy: want_buy,
+                                    entry,
+                                    tsl_activated: false,
+                                },
+                            );
                             self.confirm_counts.insert(id, 0);
                         }
                         Err(e) => tracing::error!("send_order failed: {:?}", e),
@@ -267,11 +322,14 @@ impl Trader {
                     self.instruments.get(&id).map_or("?", |s| s.as_str()),
                     pos.position_id
                 );
-                self.open_tracks.insert(id, TrackedPosition {
-                    is_buy: pos.is_buy,
-                    entry: pos.open_rate,
-                    tsl_activated: pos.is_tsl_enabled,
-                });
+                self.open_tracks.insert(
+                    id,
+                    TrackedPosition {
+                        is_buy: pos.is_buy,
+                        entry: pos.open_rate,
+                        tsl_activated: pos.is_tsl_enabled,
+                    },
+                );
             }
         }
     }
@@ -287,7 +345,9 @@ impl Trader {
         ask: f64,
         portfolio_pos: Option<&Position>,
     ) {
-        let Some(track) = self.open_tracks.get(&id) else { return };
+        let Some(track) = self.open_tracks.get(&id) else {
+            return;
+        };
         if track.tsl_activated {
             return;
         }
@@ -305,7 +365,9 @@ impl Trader {
         let Some(pos) = portfolio_pos else {
             tracing::warn!(
                 "{} : profit {:.2}% ≥ seuil TSL {:.2}% mais position_id inconnu (portfolio vide ce tick)",
-                symbol, profit_pct, self.tsl_trigger_pct
+                symbol,
+                profit_pct,
+                self.tsl_trigger_pct
             );
             return;
         };
@@ -318,7 +380,11 @@ impl Trader {
         };
         tracing::info!(
             "TSL {} position_id={} profit={:.2}% → SL trailing @{:.4} (gap {:.1}%)",
-            symbol, pos.position_id, profit_pct, new_sl, self.tsl_gap_pct
+            symbol,
+            pos.position_id,
+            profit_pct,
+            new_sl,
+            self.tsl_gap_pct
         );
 
         let req = EditPositionRequest {
