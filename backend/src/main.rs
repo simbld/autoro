@@ -8,6 +8,7 @@ mod news;
 mod routes;
 mod strategy;
 mod trader;
+mod price_feed;
 
 use axum::Router;
 use config::Config;
