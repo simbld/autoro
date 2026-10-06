@@ -5,10 +5,10 @@ mod config;
 mod etoro;
 mod models;
 mod news;
+mod price_feed;
 mod routes;
 mod strategy;
 mod trader;
-mod price_feed;
 
 use axum::Router;
 use config::Config;
