@@ -1,6 +1,7 @@
 # Rust
 target/
 backend/target/
+backend/tools
 
 # Secrets
 .env
