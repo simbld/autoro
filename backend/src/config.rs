@@ -39,7 +39,7 @@ impl std::fmt::Debug for Config {
             .field("etoro_user_key", &"[REDACTED]")
             .field("bind_addr", &self.bind_addr)
             .field("cors_origin", &self.cors_origin)
-			.field("news_api_key", &self.news_api_key)
+            .field("news_api_key", &self.news_api_key)
             .finish()
     }
 }
@@ -54,8 +54,8 @@ impl Config {
     pub fn from_env() -> Result<Config, ConfigError> {
         let etoro_base_url = std::env::var("ETORO_BASE_URL")
             .map_err(|_| ConfigError::MissingVar("ETORO_BASE_URL"))?;
-        let etoro_api_key = std::env::var("ETORO_API_KEY")
-            .map_err(|_| ConfigError::MissingVar("ETORO_API_KEY"))?;
+        let etoro_api_key =
+            std::env::var("ETORO_API_KEY").map_err(|_| ConfigError::MissingVar("ETORO_API_KEY"))?;
         let etoro_user_key = std::env::var("ETORO_USER_KEY")
             .map_err(|_| ConfigError::MissingVar("ETORO_USER_KEY"))?;
         let bind_addr = std::env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:8000".into());

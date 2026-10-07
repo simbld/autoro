@@ -2,10 +2,10 @@
 // Example: `curl -X POST http://127.0.0.1:8080/api/orders -d ...`
 
 use axum::{
+    Json, Router,
     extract::{Query, State},
     http::StatusCode,
     routing::{get, post},
-    Json, Router,
 };
 use serde::Deserialize;
 
@@ -24,7 +24,10 @@ pub struct AppState {
 }
 
 pub fn app_router(etoro_client: EtoroClient, news_api_key: Option<String>) -> Router {
-    let state = AppState { etoro_client, news_api_key };
+    let state = AppState {
+        etoro_client,
+        news_api_key,
+    };
 
     Router::new()
         .route("/health", get(health))
@@ -39,11 +42,8 @@ pub fn app_router(etoro_client: EtoroClient, news_api_key: Option<String>) -> Ro
         .with_state(state)
 }
 
-
 async fn health() -> Json<Health> {
-    Json(Health {
-        ok: true,
-    })
+    Json(Health { ok: true })
 }
 async fn create_order(
     State(state): State<AppState>,
@@ -60,7 +60,7 @@ async fn create_order(
 
 #[derive(Deserialize)]
 struct SearchQuery {
-    symbol: String
+    symbol: String,
 }
 
 async fn search_instrument(
@@ -78,22 +78,32 @@ async fn search_instrument(
 
 async fn get_catalog() -> Json<Vec<InstrumentCatalogItem>> {
     Json(vec![
-        InstrumentCatalogItem { instrument_id: 100000, symbol: "BTC".into() },
-        InstrumentCatalogItem { instrument_id: 100001, symbol: "ETH".into() },
-        InstrumentCatalogItem { instrument_id: 100063, symbol: "SOL".into() },
+        InstrumentCatalogItem {
+            instrument_id: 100000,
+            symbol: "BTC".into(),
+        },
+        InstrumentCatalogItem {
+            instrument_id: 100001,
+            symbol: "ETH".into(),
+        },
+        InstrumentCatalogItem {
+            instrument_id: 100063,
+            symbol: "SOL".into(),
+        },
     ])
 }
 
 #[derive(Deserialize)]
 struct RatesQuery {
-    ids: String
+    ids: String,
 }
 
 async fn get_rates(
     State(state): State<AppState>,
     Query(params): Query<RatesQuery>,
 ) -> Result<Json<InstrumentRatesResponse>, StatusCode> {
-    let ids: Vec<i64> = params.ids
+    let ids: Vec<i64> = params
+        .ids
         .split(',')
         .filter_map(|s| s.trim().parse().ok())
         .collect();
@@ -106,9 +116,7 @@ async fn get_rates(
         }
     }
 }
-async fn get_portfolio(
-    State(state): State<AppState>,
-) -> Result<Json<ClientPortfolio>, StatusCode> {
+async fn get_portfolio(State(state): State<AppState>) -> Result<Json<ClientPortfolio>, StatusCode> {
     match state.etoro_client.get_portfolio().await {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
@@ -124,7 +132,10 @@ async fn close_position(
     axum::extract::Query(params): axum::extract::Query<std::collections::HashMap<String, i64>>,
 ) -> Result<Json<CreateOrderResponse>, StatusCode> {
     let instrument_id = params.get("instrumentId").copied().unwrap_or(0);
-    let payload = ClosePositionRequest { instrument_id, units_to_deduct: None };
+    let payload = ClosePositionRequest {
+        instrument_id,
+        units_to_deduct: None,
+    };
     match state.etoro_client.close_position(id, payload).await {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
@@ -154,22 +165,22 @@ async fn get_history(
 
 #[derive(Deserialize)]
 struct NewsQuery {
-	symbol: String
+    symbol: String,
 }
 
 async fn get_news(
-	State(state): State<AppState>,
+    State(state): State<AppState>,
     Query(params): Query<NewsQuery>,
-) -> Result<Json<NewsResponse>, StatusCode>{
-	let Some(key) = &state.news_api_key else {
-		return Err(StatusCode::SERVICE_UNAVAILABLE);
-	};
+) -> Result<Json<NewsResponse>, StatusCode> {
+    let Some(key) = &state.news_api_key else {
+        return Err(StatusCode::SERVICE_UNAVAILABLE);
+    };
 
-	match news::fetch_news(key, &params.symbol).await {
-		Ok(response) => Ok(Json(response)),
-		Err(e) => {
-			tracing::error!("get_news failed: {:?}", e);
-			Err(StatusCode::BAD_GATEWAY)
-		}
-	}
+    match news::fetch_news(key, &params.symbol).await {
+        Ok(response) => Ok(Json(response)),
+        Err(e) => {
+            tracing::error!("get_news failed: {:?}", e);
+            Err(StatusCode::BAD_GATEWAY)
+        }
+    }
 }

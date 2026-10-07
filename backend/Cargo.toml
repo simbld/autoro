@@ -16,3 +16,5 @@ tower-http = { version = "0.6", features = ["cors"] }
 axum = "0.8.8"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4"] }
+tokio-tungstenite = { version = "0.30.0", features = ["rustls-tls-webpki-roots"] }
+futures-util = { version = "0.3.34", features = ["sink"] }

@@ -5,8 +5,8 @@ import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
 import {MatCardModule} from "@angular/material/card";
 import {Portfolio, Position, TradingService} from "../../services/trading.service";
-import {interval, merge, of, Subject} from "rxjs";
-import {map, startWith, switchMap, tap} from "rxjs/operators";
+import {EMPTY,interval, merge, of, Subject} from "rxjs";
+import {catchError, map, startWith, switchMap} from "rxjs/operators";
 import {InstrumentNamePipe} from "../../pipes/instrument-name.pipe";
 
 @Component({
@@ -22,22 +22,36 @@ export class DashboardComponent {
     private refresh$ = new Subject<void>();
     portfolio: Portfolio | null = null;
     prices: Record<number, number> = {}
-    columns = ['instrument', 'direction', 'openRate', 'amount', 'current', 'sl', 'tp', 'tsl', 'close'];
+    columns = ['instrument', 'direction', 'openRate', 'amount', 'current', 'sl', 'pnl', 'tsl', 'close'];
 
     constructor() {
         merge(interval(30000), this.refresh$).pipe(
             startWith(0),
-            switchMap(() => this.trading.getPortfolio()),
-            tap(p => this.portfolio = p),
-            switchMap((p: Portfolio) => {
-                const ids = [...new Set(p.positions.map((x: Position) => x.instrumentID))];
-                return ids.length ? this.trading.getRates(ids.join(',')) : of({rates: []});
+            switchMap(() => this.trading.getPortfolio().pipe(catchError(() => EMPTY))),
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe(p => this.portfolio = p);
+
+        interval(5000).pipe(
+            startWith(0),
+            switchMap(() => {
+                const ids = [...new Set((this.portfolio?.positions ?? []).map(x => x.instrumentID))];
+                if (!ids.length) return of({rates: []});
+                return this.trading.getRates(ids.join(',')).pipe(catchError(() => EMPTY));
             }),
             map(r => Object.fromEntries(
                 r.rates.map(x => [x.instrumentID, (x.ask + x.bid) / 2])
             ) as Record<number, number>),
             takeUntilDestroyed(this.destroyRef)
         ).subscribe(prices => this.prices = prices);
+    }
+
+    refresh() {
+        this.refresh$.next();
+    }
+    pnl(p: Position): number | null {
+        const current = this.prices[p.instrumentID];
+        if (current == null) return null;
+        return (current - p.openRate) * p.units * (p.isBuy ? 1 : -1);
     }
 
     close(p: { positionID: number, instrumentID: number }) {

@@ -4,10 +4,11 @@
 mod config;
 mod etoro;
 mod models;
+mod news;
+mod price_feed;
 mod routes;
 mod strategy;
 mod trader;
-mod news;
 
 use axum::Router;
 use config::Config;
@@ -28,7 +29,12 @@ async fn main() {
         .init();
 
     let cfg = Config::from_env().expect("Failed to load config");
-    let etoro = EtoroClient::new(cfg.etoro_base_url.as_str(), cfg.etoro_api_key.clone(), cfg.etoro_user_key.clone(), cfg.trading_mode.clone());
+    let etoro = EtoroClient::new(
+        cfg.etoro_base_url.as_str(),
+        cfg.etoro_api_key.clone(),
+        cfg.etoro_user_key.clone(),
+        cfg.trading_mode.clone(),
+    );
 
     // Lancer le trader en arrière-plan
     let trader_client = etoro.clone();
@@ -37,10 +43,10 @@ async fn main() {
         trader::Trader::start(trader_client, &trader_cfg).await;
     });
 
-	let cors: CorsLayer = CorsLayer::new()
-	  .allow_origin(Any)
-	  .allow_headers(Any)
-	  .allow_methods(Any);
+    let cors: CorsLayer = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_headers(Any)
+        .allow_methods(Any);
 
     let app: Router = app_router(etoro, cfg.news_api_key).layer(cors);
 
