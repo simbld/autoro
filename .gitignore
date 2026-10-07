@@ -2,6 +2,7 @@
 target/
 backend/target/
 backend/tools
+backend/.env
 
 # Secrets
 .env
