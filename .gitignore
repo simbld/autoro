@@ -2,10 +2,10 @@
 target/
 backend/target/
 backend/tools
-backend/.env
 
 # Secrets
 .env
+backend/.env
 
 # IDE
 .idea/
