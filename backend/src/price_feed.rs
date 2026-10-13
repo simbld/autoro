@@ -39,9 +39,9 @@ mod tests {
 
 	#[test]
 	fn delta_avec_ask_seul() {
-		// Message réel copié depuis la console
-		let brut = r#"{"messages":[{"Ask":"120.7908","content":"{\"Date\":\"2026-10-04T04:31:18Z\",\"UnitMarginAsk\":\"120.7908\",\"PriceRateID\":\"159138830098\"}"}]}"#;
-
+		// Example: A WebSocket message containing only the Ask price.
+		let brut = r#"{"messages":[{"topic":"instrument:100063","content":"{\"Ask\":\"120.7908\",\"Date\":\"2026-10-04T04:31:18Z\",\"UnitMarginAsk\":\"120.7908\",\"PriceRateID\":\"159138830098\"}"}]}"#;
+		
 		let push: WsPush = serde_json::from_str(brut).unwrap();
 		let delta: RateDelta = serde_json::from_str(&push.messages[0].content).unwrap();
 
