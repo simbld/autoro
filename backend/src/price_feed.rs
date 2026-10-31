@@ -74,4 +74,11 @@ mod tests {
         assert_eq!(delta.ask, Some(String::from("120.7908")));
         assert_eq!(delta.bid, None);
     }
+
+	#[test]
+	fn delta_bid_ask_seul() {
+		let mut quotes = vec![Quote::default(); 4];
+		let snapshot = RateDelta { ask: Some("120.79".to_string()), bid: Some("120.77".to_string()) };
+
+	}
 }
