@@ -47,6 +47,11 @@ impl Quote {
     }
 }
 
+pub fn instrument_id(topic: &str) -> Option<i64> {
+	let reste = topic.strip_prefix("instrument:")?;
+	reste.parse::<i64>().ok()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -75,10 +80,24 @@ mod tests {
         assert_eq!(delta.bid, None);
     }
 
-	#[test]
-	fn delta_bid_ask_seul() {
-		let mut quotes = vec![Quote::default(); 4];
-		let snapshot = RateDelta { ask: Some("120.79".to_string()), bid: Some("120.77".to_string()) };
+    #[test]
+    fn delta_ask_seul_conserve_bid() {
+        let mut quote = Quote::default();
+        let snapshot = RateDelta {
+            ask: Some("120.79".to_string()),
+            bid: Some("120.77".to_string()),
+        };
 
-	}
+        quote.apply(&snapshot);
+
+        let delta = RateDelta {
+            ask: Some("121".to_string()),
+            bid: None,
+        };
+
+        quote.apply(&delta);
+
+        assert_eq!(quote.ask, Some(121.00));
+        assert_eq!(quote.bid, Some(120.77));
+    }
 }
