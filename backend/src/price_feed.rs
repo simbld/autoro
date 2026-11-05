@@ -100,4 +100,11 @@ mod tests {
         assert_eq!(quote.ask, Some(121.00));
         assert_eq!(quote.bid, Some(120.77));
     }
+
+	#[test]
+	fn extrait_id_depuis_topic() {
+		assert_eq!(instrument_id("instrument:100063"), Some(100_063));
+		assert_eq!(instrument_id("candle:100063"), None);
+		assert_eq!(instrument_id("instrument:abc"), None);
+	}
 }
