@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
 use serde::Deserialize;
+use std::collections::HashMap;
+use serde_json::Error;
 
 /// Enveloppe d'un push eToro : `{ "messages": [...] }`
 #[derive(Debug, Deserialize)]
@@ -51,6 +53,18 @@ pub fn instrument_id(topic: &str) -> Option<i64> {
 	let reste = topic.strip_prefix("instrument:")?;
 	reste.parse::<i64>().ok()
 }
+
+/// Traite un message texte reçu d'eToro et met à jour les prix connus.
+pub fn handle_text(text: &str, quotes: &mut HashMap<i64, Quote>) {
+	let Ok(push): Result<WsPush, Error> = serde_json::from_str(text) else { return; };
+
+	for message in push.messages {
+		let Some(id) = instrument_id(&message.topic) else { continue; };
+	}
+
+	let Ok(delta): Result<RateDelta, Error> = serde_json::from_str(content) else { continue; };
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -103,7 +117,7 @@ mod tests {
 
 	#[test]
 	fn extrait_id_depuis_topic() {
-		assert_eq!(instrument_id("instrument:100063"), Some(100_063));
+		assert_eq!(instrument_id("instrument:100063"), Some(100063));
 		assert_eq!(instrument_id("candle:100063"), None);
 		assert_eq!(instrument_id("instrument:abc"), None);
 	}
