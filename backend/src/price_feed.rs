@@ -2,7 +2,6 @@
 
 use serde::Deserialize;
 use std::collections::HashMap;
-use serde_json::Error;
 
 /// Enveloppe d'un push eToro : `{ "messages": [...] }`
 #[derive(Debug, Deserialize)]
@@ -50,21 +49,27 @@ impl Quote {
 }
 
 pub fn instrument_id(topic: &str) -> Option<i64> {
-	let reste = topic.strip_prefix("instrument:")?;
-	reste.parse::<i64>().ok()
+    let reste = topic.strip_prefix("instrument:")?;
+    reste.parse::<i64>().ok()
 }
 
 /// Traite un message texte reçu d'eToro et met à jour les prix connus.
 pub fn handle_text(text: &str, quotes: &mut HashMap<i64, Quote>) {
-	let Ok(push): Result<WsPush, Error> = serde_json::from_str(text) else { return; };
+    let Ok(push) = serde_json::from_str::<WsPush>(text) else {
+        return;
+    };
 
-	for message in push.messages {
-		let Some(id) = instrument_id(&message.topic) else { continue; };
-	}
+    for message in push.messages {
+        let Some(id) = instrument_id(&message.topic) else {
+            continue;
+        };
 
-	let Ok(delta): Result<RateDelta, Error> = serde_json::from_str(content) else { continue; };
+        let Ok(delta) = serde_json::from_str::<RateDelta>(&message.content) else {
+            continue;
+        };
+        quotes.entry(id).or_default().apply(&delta);
+    }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -115,10 +120,28 @@ mod tests {
         assert_eq!(quote.bid, Some(120.77));
     }
 
+    #[test]
+    fn extrait_id_depuis_topic() {
+        assert_eq!(instrument_id("instrument:100063"), Some(100063));
+        assert_eq!(instrument_id("candle:100063"), None);
+        assert_eq!(instrument_id("instrument:abc"), None);
+    }
+
 	#[test]
-	fn extrait_id_depuis_topic() {
-		assert_eq!(instrument_id("instrument:100063"), Some(100063));
-		assert_eq!(instrument_id("candle:100063"), None);
-		assert_eq!(instrument_id("instrument:abc"), None);
+	fn sequence_complete_etoro() {
+		let mut quotes = HashMap::new();
+
+		// 1. Réponse d'auth : pas de "messages" → doit être ignorée sans planter
+		handle_text(r#"{"id":"x","success":true,"operation":"Authenticate"}"#, &mut quotes);
+
+		// 2. Snapshot SOL : Ask + Bid
+		handle_text(r#"{"messages":[{"topic":"instrument:100063","content":"{\"Ask\":\"120.79\",\"Bid\":\"120.77\"}"}]}"#, &mut quotes);
+
+		// 3. Delta SOL : seulement Ask
+		handle_text(r#"{"messages":[{"topic":"instrument:100063","content":"{\"Ask\":\"121\"}"}]}"#, &mut quotes);
+
+		assert_eq!(quotes.len(), 1);
+		assert_eq!(quotes[&100063].ask, Some(121.00));
+		assert_eq!(quotes[&100063].bid, Some(120.77));
 	}
 }
