@@ -35,13 +35,13 @@ impl Quote {
     /// Applique un delta : ne met à jour QUE les champs présents.
     pub fn apply(&mut self, delta: &RateDelta) {
         if let Some(ask) = &delta.ask
-            && let Some(price) = ask.parse::<f64>().ok()
+            && let Ok(price) = ask.parse::<f64>()
         {
             self.ask = Some(price);
         }
 
         if let Some(bid) = &delta.bid
-            && let Some(price) = bid.parse::<f64>().ok()
+            && let Ok(price) = bid.parse::<f64>()
         {
             self.bid = Some(price);
         }
@@ -127,21 +127,30 @@ mod tests {
         assert_eq!(instrument_id("instrument:abc"), None);
     }
 
-	#[test]
-	fn sequence_complete_etoro() {
-		let mut quotes = HashMap::new();
+    #[test]
+    fn sequence_complete_etoro() {
+        let mut quotes = HashMap::new();
 
-		// 1. Réponse d'auth : pas de "messages" → doit être ignorée sans planter
-		handle_text(r#"{"id":"x","success":true,"operation":"Authenticate"}"#, &mut quotes);
+        // 1. Réponse d'auth : pas de "messages" → doit être ignorée sans planter
+        handle_text(
+            r#"{"id":"x","success":true,"operation":"Authenticate"}"#,
+            &mut quotes,
+        );
 
-		// 2. Snapshot SOL : Ask + Bid
-		handle_text(r#"{"messages":[{"topic":"instrument:100063","content":"{\"Ask\":\"120.79\",\"Bid\":\"120.77\"}"}]}"#, &mut quotes);
+        // 2. Snapshot SOL : Ask + Bid
+        handle_text(
+            r#"{"messages":[{"topic":"instrument:100063","content":"{\"Ask\":\"120.79\",\"Bid\":\"120.77\"}"}]}"#,
+            &mut quotes,
+        );
 
-		// 3. Delta SOL : seulement Ask
-		handle_text(r#"{"messages":[{"topic":"instrument:100063","content":"{\"Ask\":\"121\"}"}]}"#, &mut quotes);
+        // 3. Delta SOL : seulement Ask
+        handle_text(
+            r#"{"messages":[{"topic":"instrument:100063","content":"{\"Ask\":\"121\"}"}]}"#,
+            &mut quotes,
+        );
 
-		assert_eq!(quotes.len(), 1);
-		assert_eq!(quotes[&100063].ask, Some(121.00));
-		assert_eq!(quotes[&100063].bid, Some(120.77));
-	}
+        assert_eq!(quotes.len(), 1);
+        assert_eq!(quotes[&100063].ask, Some(121.00));
+        assert_eq!(quotes[&100063].bid, Some(120.77));
+    }
 }
